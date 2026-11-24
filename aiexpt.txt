@@ -1,0 +1,4615 @@
+1. Breadth-First Search (BFS)
+from collections import deque
+ROMANIA_MAP = {
+    'Oradea': [('Zerind', 71), ('Sibiu', 151)],
+    'Zerind': [('Oradea', 71), ('Arad', 75)],
+    'Arad': [('Zerind', 75), ('Sibiu', 140), ('Timisoara', 118)],
+    'Timisoara': [('Arad', 118), ('Lugoj', 111)],
+    'Lugoj': [('Timisoara', 111), ('Mehadia', 70)],
+    'Mehadia': [('Lugoj', 70), ('Drobeta', 75)],
+    'Drobeta': [('Mehadia', 75), ('Craiova', 120)],
+    'Craiova': [('Drobeta', 120), ('Rimnicu Vilcea', 146), ('Pitesti', 138)],
+    'Sibiu': [('Oradea', 151), ('Arad', 140), ('Fagaras', 99), ('Rimnicu Vilcea', 80)],
+    'Fagaras': [('Sibiu', 99), ('Bucharest', 211)],
+    'Rimnicu Vilcea': [('Sibiu', 80), ('Craiova', 146), ('Pitesti', 97)],
+    'Pitesti': [('Rimnicu Vilcea', 97), ('Craiova', 138), ('Bucharest', 101)],
+    'Bucharest': [('Fagaras', 211), ('Pitesti', 101), ('Urziceni', 85)],
+    'Urziceni': [('Bucharest', 85), ('Hirsova', 98), ('Vaslui', 142)],
+    'Hirsova': [('Urziceni', 98), ('Eforie', 86)],
+    'Eforie': [('Hirsova', 86)],
+    'Vaslui': [('Urziceni', 142), ('Iasi', 92)],
+    'Iasi': [('Vaslui', 92), ('Neamt', 87)],
+    'Neamt': [('Iasi', 87)],
+}
+class SearchNode:
+    def __init__(self, state, parent=None, step_cost=0, cost=0, depth=0):
+        self.state, self.parent = state, parent
+        self.step_cost, self.cost, self.depth = step_cost, cost, depth
+    def path(self):
+        node, states = self, []
+        while node:
+            states.append(node.state)
+            node = node.parent
+        return states[::-1]
+def successors(state):
+    return ROMANIA_MAP.get(state, [])
+def report(name, goal, expanded, max_fringe):
+    print("\n" + "=" * 60)
+    print(f"SOLUTION - {name}")
+    print("=" * 60)
+    if goal is None:
+        print("No solution found!")
+        return
+    print("Path :", " -> ".join(goal.path()))
+    print("Total Cost :", goal.cost, "km")
+    print("Path Length :", goal.depth, "steps")
+    print("Nodes Expanded:", expanded)
+    print("Max Fringe :", max_fringe)
+def bfs(start, goal):
+    frontier = deque([SearchNode(start)])
+    explored, seen, expanded, max_fringe = set(), {start}, 0, 1
+    print("BREADTH-FIRST SEARCH (BFS)\n" + "-" * 60)
+    while frontier:
+        max_fringe = max(max_fringe, len(frontier))
+        node = frontier.popleft()
+        print(f"Expanding: {node.state:<15} (Depth: {node.depth})")
+        if node.state == goal:
+            return node, expanded, max_fringe
+        explored.add(node.state)
+        expanded += 1
+        for nxt, cost in successors(node.state):
+            if nxt not in explored and nxt not in seen:
+                seen.add(nxt)
+                frontier.append(SearchNode(nxt, node, cost, node.cost + cost, node.depth + 1))
+    return None, expanded, max_fringe
+if __name__ == "__main__":
+    result = bfs("Arad", "Bucharest")
+    report("BFS", *result)
+
+
+
+
+2. Depth-First Search (DFS)
+ROMANIA_MAP = {
+    'Oradea': [('Zerind', 71), ('Sibiu', 151)],
+    'Zerind': [('Oradea', 71), ('Arad', 75)],
+    'Arad': [('Zerind', 75), ('Sibiu', 140), ('Timisoara', 118)],
+    'Timisoara': [('Arad', 118), ('Lugoj', 111)],
+    'Lugoj': [('Timisoara', 111), ('Mehadia', 70)],
+    'Mehadia': [('Lugoj', 70), ('Drobeta', 75)],
+    'Drobeta': [('Mehadia', 75), ('Craiova', 120)],
+    'Craiova': [('Drobeta', 120), ('Rimnicu Vilcea', 146), ('Pitesti', 138)],
+    'Sibiu': [('Oradea', 151), ('Arad', 140), ('Fagaras', 99), ('Rimnicu Vilcea', 80)],
+    'Fagaras': [('Sibiu', 99), ('Bucharest', 211)],
+    'Rimnicu Vilcea': [('Sibiu', 80), ('Craiova', 146), ('Pitesti', 97)],
+    'Pitesti': [('Rimnicu Vilcea', 97), ('Craiova', 138), ('Bucharest', 101)],
+    'Bucharest': [('Fagaras', 211), ('Pitesti', 101), ('Urziceni', 85)],
+    'Urziceni': [('Bucharest', 85), ('Hirsova', 98), ('Vaslui', 142)],
+    'Hirsova': [('Urziceni', 98), ('Eforie', 86)],
+    'Eforie': [('Hirsova', 86)],
+    'Vaslui': [('Urziceni', 142), ('Iasi', 92)],
+    'Iasi': [('Vaslui', 92), ('Neamt', 87)],
+    'Neamt': [('Iasi', 87)],
+}
+class SearchNode:
+    def __init__(self, state, parent=None, step_cost=0, cost=0, depth=0):
+        self.state, self.parent = state, parent
+        self.step_cost, self.cost, self.depth = step_cost, cost, depth
+    def path(self):
+        node, states = self, []
+        while node:
+            states.append(node.state)
+            node = node.parent
+        return states[::-1]
+def successors(state):
+    return ROMANIA_MAP.get(state, [])
+def report(name, goal, expanded, max_fringe):
+    print("\n" + "=" * 60)
+    print(f"SOLUTION - {name}")
+    print("=" * 60)
+    if goal is None:
+        print("No solution found!")
+        return
+    print("Path :", " -> ".join(goal.path()))
+    print("Total Cost :", goal.cost, "km")
+    print("Path Length :", goal.depth, "steps")
+    print("Nodes Expanded:", expanded)
+    print("Max Fringe :", max_fringe)
+def dfs(start, goal, max_depth=50):
+    frontier = [SearchNode(start)]
+    explored, expanded, max_fringe = set(), 0, 1
+    print("DEPTH-FIRST SEARCH (DFS) | depth limit =", max_depth + "" if False else max_depth)
+    print("-" * 60)
+    while frontier:
+        max_fringe = max(max_fringe, len(frontier))
+        node = frontier.pop()
+        if node.state in explored or node.depth > max_depth:
+            continue
+        print(f"Expanding: {node.state:<15} (Depth: {node.depth})")
+        if node.state == goal:
+            return node, expanded, max_fringe
+        explored.add(node.state)
+        expanded += 1
+        for nxt, cost in reversed(successors(node.state)):
+            if nxt not in explored:
+                frontier.append(SearchNode(nxt, node, cost, node.cost + cost, node.depth + 1))
+    return None, expanded, max_fringe
+if __name__ == "__main__":
+    result = dfs("Arad", "Bucharest")
+    report("DFS", *result)
+
+
+
+3. Uniform Cost Search (UCS)
+import heapq
+ROMANIA_MAP = {
+    'Oradea': [('Zerind', 71), ('Sibiu', 151)],
+    'Zerind': [('Oradea', 71), ('Arad', 75)],
+    'Arad': [('Zerind', 75), ('Sibiu', 140), ('Timisoara', 118)],
+    'Timisoara': [('Arad', 118), ('Lugoj', 111)],
+    'Lugoj': [('Timisoara', 111), ('Mehadia', 70)],
+    'Mehadia': [('Lugoj', 70), ('Drobeta', 75)],
+    'Drobeta': [('Mehadia', 75), ('Craiova', 120)],
+    'Craiova': [('Drobeta', 120), ('Rimnicu Vilcea', 146), ('Pitesti', 138)],
+    'Sibiu': [('Oradea', 151), ('Arad', 140), ('Fagaras', 99), ('Rimnicu Vilcea', 80)],
+    'Fagaras': [('Sibiu', 99), ('Bucharest', 211)],
+    'Rimnicu Vilcea': [('Sibiu', 80), ('Craiova', 146), ('Pitesti', 97)],
+    'Pitesti': [('Rimnicu Vilcea', 97), ('Craiova', 138), ('Bucharest', 101)],
+    'Bucharest': [('Fagaras', 211), ('Pitesti', 101), ('Urziceni', 85)],
+    'Urziceni': [('Bucharest', 85), ('Hirsova', 98), ('Vaslui', 142)],
+    'Hirsova': [('Urziceni', 98), ('Eforie', 86)],
+    'Eforie': [('Hirsova', 86)],
+    'Vaslui': [('Urziceni', 142), ('Iasi', 92)],
+    'Iasi': [('Vaslui', 92), ('Neamt', 87)],
+    'Neamt': [('Iasi', 87)],
+}
+class SearchNode:
+    def __init__(self, state, parent=None, step_cost=0, cost=0, depth=0):
+        self.state, self.parent = state, parent
+        self.step_cost, self.cost, self.depth = step_cost, cost, depth
+    def path(self):
+        node, states = self, []
+        while node:
+            states.append(node.state)
+            node = node.parent
+        return states[::-1]
+def successors(state):
+    return ROMANIA_MAP.get(state, [])
+def report(name, goal, expanded, max_fringe):
+    print("\n" + "=" * 60)
+    print(f"SOLUTION - {name}")
+    print("=" * 60)
+    if goal is None:
+        print("No solution found!")
+        return
+    print("Path :", " -> ".join(goal.path()))
+    print("Total Cost :", goal.cost, "km")
+    print("Path Length :", goal.depth, "steps")
+    print("Nodes Expanded:", expanded)
+    print("Max Fringe :", max_fringe)
+def ucs(start, goal):
+    root = SearchNode(start)
+    frontier = [(0, 0, root)]
+    best_cost, explored = {start: 0}, set()
+    counter, expanded, max_fringe = 1, 0, 1
+    print("UNIFORM COST SEARCH (UCS)\n" + "-" * 60)
+    while frontier:
+        max_fringe = max(max_fringe, len(frontier))
+        cost, _, node = heapq.heappop(frontier)
+        if node.state in explored or cost > best_cost.get(node.state, float("inf")):
+            continue
+        print(f"Expanding: {node.state:<15} (Cost: {node.cost})")
+        if node.state == goal:
+            return node, expanded, max_fringe
+        explored.add(node.state)
+        expanded += 1
+        for nxt, step in successors(node.state):
+            new_cost = node.cost + step
+            if nxt not in explored and new_cost < best_cost.get(nxt, float("inf")):
+                best_cost[nxt] = new_cost
+                child = SearchNode(nxt, node, step, new_cost, node.depth + 1)
+                heapq.heappush(frontier, (new_cost, counter, child))
+                counter += 1
+    return None, expanded, max_fringe
+if __name__ == "__main__":
+    result = ucs("Arad", "Bucharest")
+    report("UCS", *result)
+
+
+4. Greedy Best-First Search
+import heapq
+ROMANIA_MAP = {
+    'Oradea': [('Zerind', 71), ('Sibiu', 151)],
+    'Zerind': [('Oradea', 71), ('Arad', 75)],
+    'Arad': [('Zerind', 75), ('Sibiu', 140), ('Timisoara', 118)],
+    'Timisoara': [('Arad', 118), ('Lugoj', 111)],
+    'Lugoj': [('Timisoara', 111), ('Mehadia', 70)],
+    'Mehadia': [('Lugoj', 70), ('Drobeta', 75)],
+    'Drobeta': [('Mehadia', 75), ('Craiova', 120)],
+    'Craiova': [('Drobeta', 120), ('Rimnicu Vilcea', 146), ('Pitesti', 138)],
+    'Sibiu': [('Oradea', 151), ('Arad', 140), ('Fagaras', 99), ('Rimnicu Vilcea', 80)],
+    'Fagaras': [('Sibiu', 99), ('Bucharest', 211)],
+    'Rimnicu Vilcea': [('Sibiu', 80), ('Craiova', 146), ('Pitesti', 97)],
+    'Pitesti': [('Rimnicu Vilcea', 97), ('Craiova', 138), ('Bucharest', 101)],
+    'Bucharest': [('Fagaras', 211), ('Pitesti', 101), ('Urziceni', 85)],
+    'Urziceni': [('Bucharest', 85), ('Hirsova', 98), ('Vaslui', 142)],
+    'Hirsova': [('Urziceni', 98), ('Eforie', 86)],
+    'Eforie': [('Hirsova', 86)],
+    'Vaslui': [('Urziceni', 142), ('Iasi', 92)],
+    'Iasi': [('Vaslui', 92), ('Neamt', 87)],
+    'Neamt': [('Iasi', 87)],
+}
+H = {
+    'Arad': 366, 'Bucharest': 0, 'Craiova': 160, 'Drobeta': 242, 'Eforie': 161,
+    'Fagaras': 176, 'Hirsova': 151, 'Iasi': 226, 'Lugoj': 244, 'Mehadia': 241,
+    'Neamt': 234, 'Oradea': 380, 'Pitesti': 100, 'Rimnicu Vilcea': 193,
+    'Sibiu': 253, 'Timisoara': 329, 'Urziceni': 80, 'Vaslui': 199, 'Zerind': 374,
+}
+class SearchNode:
+    def __init__(self, state, parent=None, g=0, h=0, f=0, depth=0):
+        self.state, self.parent = state, parent
+        self.g, self.h, self.f, self.depth = g, h, f, depth
+
+    def path(self):
+        node, states = self, []
+        while node:
+            states.append(node.state)
+            node = node.parent
+        return states[::-1]
+
+
+def successors(state):
+    return ROMANIA_MAP.get(state, [])
+
+
+def report(name, goal, expanded, max_fringe):
+    print("\n" + "=" * 60)
+    print(f"SOLUTION - {name}")
+    print("=" * 60)
+    if goal is None:
+        print("No solution found!")
+        return
+    print("Path :", " -> ".join(goal.path()))
+    print("Total Cost :", goal.g, "km")
+    print("Path Length :", goal.depth, "steps")
+    print("Nodes Expanded:", expanded)
+    print("Max Fringe :", max_fringe)
+    print("\nStep-by-step:")
+    node_chain, n = [], goal
+    while n.parent:
+        node_chain.append(n)
+        n = n.parent
+    for i, n in enumerate(reversed(node_chain), 1):
+        print(f" {i}. {n.parent.state} -> {n.state} (g = {n.g} km, h = {n.h} km)")
+
+
+def greedy_best_first(start, goal):
+    root = SearchNode(start, h=H[start], f=H[start])
+    frontier = [(root.f, 0, root)]
+    explored, counter, expanded, max_fringe = set(), 1, 0, 1
+    print("GREEDY BEST-FIRST SEARCH [ f(n) = h(n) ]\n" + "-" * 60)
+    while frontier:
+        max_fringe = max(max_fringe, len(frontier))
+        _, _, node = heapq.heappop(frontier)
+        if node.state in explored:
+            continue
+        print(f"Expanding: {node.state:<15} (h = {node.h}, f = {node.f})")
+        if node.state == goal:
+            return node, expanded, max_fringe
+        explored.add(node.state)
+        expanded += 1
+        for nxt, step in successors(node.state):
+            if nxt not in explored:
+                child = SearchNode(nxt, node, node.g + step, H[nxt], H[nxt], node.depth + 1)
+                heapq.heappush(frontier, (child.f, counter, child))
+                counter += 1
+    return None, expanded, max_fringe
+
+
+if __name__ == "__main__":
+    result = greedy_best_first("Arad", "Bucharest")
+    report("Greedy Best-First", *result)
+
+
+5. A* Search
+import heapq
+ROMANIA_MAP = {
+    'Oradea': [('Zerind', 71), ('Sibiu', 151)],
+    'Zerind': [('Oradea', 71), ('Arad', 75)],
+    'Arad': [('Zerind', 75), ('Sibiu', 140), ('Timisoara', 118)],
+    'Timisoara': [('Arad', 118), ('Lugoj', 111)],
+    'Lugoj': [('Timisoara', 111), ('Mehadia', 70)],
+    'Mehadia': [('Lugoj', 70), ('Drobeta', 75)],
+    'Drobeta': [('Mehadia', 75), ('Craiova', 120)],
+    'Craiova': [('Drobeta', 120), ('Rimnicu Vilcea', 146), ('Pitesti', 138)],
+    'Sibiu': [('Oradea', 151), ('Arad', 140), ('Fagaras', 99), ('Rimnicu Vilcea', 80)],
+    'Fagaras': [('Sibiu', 99), ('Bucharest', 211)],
+    'Rimnicu Vilcea': [('Sibiu', 80), ('Craiova', 146), ('Pitesti', 97)],
+    'Pitesti': [('Rimnicu Vilcea', 97), ('Craiova', 138), ('Bucharest', 101)],
+    'Bucharest': [('Fagaras', 211), ('Pitesti', 101), ('Urziceni', 85)],
+    'Urziceni': [('Bucharest', 85), ('Hirsova', 98), ('Vaslui', 142)],
+    'Hirsova': [('Urziceni', 98), ('Eforie', 86)],
+    'Eforie': [('Hirsova', 86)],
+    'Vaslui': [('Urziceni', 142), ('Iasi', 92)],
+    'Iasi': [('Vaslui', 92), ('Neamt', 87)],
+    'Neamt': [('Iasi', 87)],
+}
+H = {
+    'Arad': 366, 'Bucharest': 0, 'Craiova': 160, 'Drobeta': 242, 'Eforie': 161,
+    'Fagaras': 176, 'Hirsova': 151, 'Iasi': 226, 'Lugoj': 244, 'Mehadia': 241,
+    'Neamt': 234, 'Oradea': 380, 'Pitesti': 100, 'Rimnicu Vilcea': 193,
+    'Sibiu': 253, 'Timisoara': 329, 'Urziceni': 80, 'Vaslui': 199, 'Zerind': 374,
+}
+class SearchNode:
+    def __init__(self, state, parent=None, g=0, h=0, f=0, depth=0):
+        self.state, self.parent = state, parent
+        self.g, self.h, self.f, self.depth = g, h, f, depth
+    def path(self):
+        node, states = self, []
+        while node:
+            states.append(node.state)
+            node = node.parent
+        return states[::-1]
+def successors(state):
+    return ROMANIA_MAP.get(state, [])
+def report(name, goal, expanded, max_fringe):
+    print("\n" + "=" * 60)
+    print(f"SOLUTION - {name}")
+    print("=" * 60)
+    if goal is None:
+        print("No solution found!")
+        return
+    print("Path :", " -> ".join(goal.path()))
+    print("Total Cost :", goal.g, "km")
+    print("Path Length :", goal.depth, "steps")
+    print("Nodes Expanded:", expanded)
+    print("Max Fringe :", max_fringe)
+    print("\nStep-by-step:")
+    node_chain, n = [], goal
+    while n.parent:
+        node_chain.append(n)
+        n = n.parent
+    for i, n in enumerate(reversed(node_chain), 1):
+        print(f" {i}. {n.parent.state} -> {n.state} (g = {n.g} km, h = {n.h} km)")
+def a_star(start, goal):
+    root = SearchNode(start, g=0, h=H[start], f=H[start])
+    frontier = [(root.f, 0, root)]
+    best_g, explored = {start: 0}, set()
+    counter, expanded, max_fringe = 1, 0, 1
+    print("A* SEARCH [ f(n) = g(n) + h(n) ]\n" + "-" * 60)
+    while frontier:
+        max_fringe = max(max_fringe, len(frontier))
+        _, _, node = heapq.heappop(frontier)
+        if node.state in explored or node.g > best_g.get(node.state, float("inf")):
+            continue
+        print(f"Expanding: {node.state:<15} (g = {node.g}, h = {node.h}, f = {node.f})")
+        if node.state == goal:
+            return node, expanded, max_fringe
+        explored.add(node.state)
+        expanded += 1
+        for nxt, step in successors(node.state):
+            new_g = node.g + step
+            if nxt not in explored and new_g < best_g.get(nxt, float("inf")):
+                best_g[nxt] = new_g
+                child = SearchNode(nxt, node, new_g, H[nxt], new_g + H[nxt], node.depth + 1)
+                heapq.heappush(frontier, (child.f, counter, child))
+                counter += 1
+    return None, expanded, max_fringe
+if __name__ == "__main__":
+    result = a_star("Arad", "Bucharest")
+    report("A*", *result)
+
+
+
+
+6. Bayesian Network - Medical Diagnosis System
+import itertools
+from typing import Dict, List, Optional, Tuple
+
+
+class BayesianNetwork:
+    def __init__(self, name: str = "Bayesian Network"):
+        self.name = name
+        self.nodes = {}
+        self.variables = []
+        self.adjacency_list = {}
+
+    def add_node(
+        self,
+        name: str,
+        states: List[str],
+        parents: Optional[List[str]] = None,
+        cpt: Optional[Dict[Tuple, float]] = None,
+    ):
+        parents = parents or []
+        self.nodes[name] = {
+            "states": states,
+            "parents": parents,
+            "cpt": cpt or {},
+            "children": [],
+        }
+        self.adjacency_list.setdefault(name, [])
+        if name not in self.variables:
+            self.variables.append(name)
+        for parent in parents:
+            self.adjacency_list.setdefault(parent, [])
+            if name not in self.adjacency_list[parent]:
+                self.adjacency_list[parent].append(name)
+
+    def get_probability(
+        self, node: str, state: str, parent_states: Dict[str, str]
+    ) -> float:
+        node_info = self.nodes[node]
+        parents = node_info["parents"]
+        cpt = node_info["cpt"]
+        if not parents:
+            return cpt.get(state, 0.0)
+        key = (state,) + tuple(parent_states[parent] for parent in parents)
+        return cpt.get(key, 0.0)
+
+    def get_all_states(self) -> Dict[str, List[str]]:
+        return {node: self.nodes[node]["states"] for node in self.variables}
+
+    def generate_all_assignments(self) -> List[Dict[str, str]]:
+        all_states = self.get_all_states()
+        state_lists = [all_states[variable] for variable in self.variables]
+        return [
+            dict(zip(self.variables, combination))
+            for combination in itertools.product(*state_lists)
+        ]
+
+    def joint_probability(self, assignment: Dict[str, str]) -> float:
+        probability = 1.0
+        for node in self.variables:
+            state = assignment[node]
+            parents = self.nodes[node]["parents"]
+            parent_states = {parent: assignment[parent] for parent in parents}
+            probability *= self.get_probability(node, state, parent_states)
+        return probability
+
+    def marginal_probability(
+        self,
+        query_var: str,
+        query_state: str,
+        evidence: Optional[Dict[str, str]] = None,
+    ) -> float:
+        evidence = evidence or {}
+        numerator = 0.0
+        denominator = 0.0
+        for assignment in self.generate_all_assignments():
+            if any(
+                assignment[variable] != state
+                for variable, state in evidence.items()
+            ):
+                continue
+            probability = self.joint_probability(assignment)
+            if assignment[query_var] == query_state:
+                numerator += probability
+            denominator += probability
+        if denominator == 0:
+            return 0.0
+        return numerator / denominator
+
+    def query(
+        self, query_var: str, evidence: Optional[Dict[str, str]] = None
+    ) -> Dict[str, float]:
+        states = self.nodes[query_var]["states"]
+        result = {
+            state: self.marginal_probability(query_var, state, evidence)
+            for state in states
+        }
+        total = sum(result.values())
+        if total > 0:
+            for state in result:
+                result[state] /= total
+        return result
+
+    def print_network_structure(self):
+        print("\n" + "=" * 70)
+        print(f" BAYESIAN NETWORK: {self.name}")
+        print("=" * 70)
+        print("\nVariables:")
+        for variable in self.variables:
+            parents = self.nodes[variable]["parents"]
+            children = self.adjacency_list.get(variable, [])
+            states = self.nodes[variable]["states"]
+            print(f"\n[{variable}]")
+            print(f" States: {states}")
+            print(f" Parents: {parents if parents else 'None (Prior)'}")
+            print(f" Children: {children if children else 'None'}")
+
+    def print_cpt(self, node: str):
+        print(f"\nCPT for {node}:")
+        print("-" * 50)
+        node_info = self.nodes[node]
+        states = node_info["states"]
+        parents = node_info["parents"]
+        cpt = node_info["cpt"]
+        if not parents:
+            print("Prior Probability:")
+            for state in states:
+                probability = cpt.get(state, 0.0)
+                print(f" P({node} = {state}) = {probability:.3f}")
+            return
+
+        parent_states = [self.nodes[parent]["states"] for parent in parents]
+        print(f"Conditional on: {parents}")
+        print(f"P({node} | {', '.join(parents)})")
+        print("-" * 50)
+        for combination in itertools.product(*parent_states):
+            parent_str = ", ".join(
+                f"{parent}={combination[index]}"
+                for index, parent in enumerate(parents)
+            )
+            print(f"\n Given: {parent_str}")
+            for state in states:
+                key = (state,) + combination
+                probability = cpt.get(key, 0.0)
+                print(f" P({node} = {state}) = {probability:.3f}")
+
+
+class MedicalDiagnosisNetwork(BayesianNetwork):
+    def __init__(self):
+        super().__init__("Medical Diagnosis System")
+
+        age_cpt = {
+            "Young": 0.30,
+            "Middle": 0.45,
+            "Old": 0.25,
+        }
+        self.add_node("Age", ["Young", "Middle", "Old"], cpt=age_cpt)
+
+        smoking_cpt = {
+            "No": 0.60,
+            "Yes": 0.40,
+        }
+        self.add_node("Smoking", ["No", "Yes"], cpt=smoking_cpt)
+
+        lung_cancer_cpt = {
+            ("Present", "Young", "No"): 0.01,
+            ("Present", "Young", "Yes"): 0.05,
+            ("Present", "Middle", "No"): 0.02,
+            ("Present", "Middle", "Yes"): 0.10,
+            ("Present", "Old", "No"): 0.04,
+            ("Present", "Old", "Yes"): 0.20,
+            ("Absent", "Young", "No"): 0.99,
+            ("Absent", "Young", "Yes"): 0.95,
+            ("Absent", "Middle", "No"): 0.98,
+            ("Absent", "Middle", "Yes"): 0.90,
+            ("Absent", "Old", "No"): 0.96,
+            ("Absent", "Old", "Yes"): 0.80,
+        }
+        self.add_node(
+            "LungCancer",
+            ["Present", "Absent"],
+            parents=["Age", "Smoking"],
+            cpt=lung_cancer_cpt,
+        )
+
+        heart_disease_cpt = {
+            ("Present", "Young", "No"): 0.005,
+            ("Present", "Young", "Yes"): 0.02,
+            ("Present", "Middle", "No"): 0.01,
+            ("Present", "Middle", "Yes"): 0.05,
+            ("Present", "Old", "No"): 0.03,
+            ("Present", "Old", "Yes"): 0.12,
+            ("Absent", "Young", "No"): 0.995,
+            ("Absent", "Young", "Yes"): 0.98,
+            ("Absent", "Middle", "No"): 0.99,
+            ("Absent", "Middle", "Yes"): 0.95,
+            ("Absent", "Old", "No"): 0.97,
+            ("Absent", "Old", "Yes"): 0.88,
+        }
+        self.add_node(
+            "HeartDisease",
+            ["Present", "Absent"],
+            parents=["Age", "Smoking"],
+            cpt=heart_disease_cpt,
+        )
+
+        cough_cpt = {
+            ("Yes", "Present"): 0.70,
+            ("Yes", "Absent"): 0.10,
+            ("No", "Present"): 0.30,
+            ("No", "Absent"): 0.90,
+        }
+        self.add_node(
+            "Cough", ["Yes", "No"], parents=["LungCancer"], cpt=cough_cpt
+        )
+
+        chest_pain_cpt = {
+            ("Yes", "Present"): 0.80,
+            ("Yes", "Absent"): 0.05,
+            ("No", "Present"): 0.20,
+            ("No", "Absent"): 0.95,
+        }
+        self.add_node(
+            "ChestPain",
+            ["Yes", "No"],
+            parents=["HeartDisease"],
+            cpt=chest_pain_cpt,
+        )
+
+        fatigue_cpt = {
+            ("Yes", "Present", "Present"): 0.90,
+            ("Yes", "Present", "Absent"): 0.60,
+            ("Yes", "Absent", "Present"): 0.70,
+            ("Yes", "Absent", "Absent"): 0.15,
+            ("No", "Present", "Present"): 0.10,
+            ("No", "Present", "Absent"): 0.40,
+            ("No", "Absent", "Present"): 0.30,
+            ("No", "Absent", "Absent"): 0.85,
+        }
+        self.add_node(
+            "Fatigue",
+            ["Yes", "No"],
+            parents=["LungCancer", "HeartDisease"],
+            cpt=fatigue_cpt,
+        )
+
+        fever_cpt = {
+            ("Yes", "Yes"): 0.60,
+            ("Yes", "No"): 0.10,
+            ("No", "Yes"): 0.40,
+            ("No", "No"): 0.90,
+        }
+        self.add_node("Fever", ["Yes", "No"], parents=["Fatigue"], cpt=fever_cpt)
+
+
+def demonstrate_causal_inference(network: MedicalDiagnosisNetwork):
+    print("\n" + "=" * 70)
+    print(" CAUSAL INFERENCE (Prediction)")
+    print("=" * 70)
+    print("\n[Query 1] P(LungCancer | Age='Old', Smoking='Yes')")
+    result = network.query(
+        "LungCancer", evidence={"Age": "Old", "Smoking": "Yes"}
+    )
+    print(
+        f" P(LungCancer='Present') = {result.get('Present', 0):.3f} "
+        f"({result.get('Present', 0) * 100:.1f}%)"
+    )
+    print(
+        f" P(LungCancer='Absent') = {result.get('Absent', 0):.3f} "
+        f"({result.get('Absent', 0) * 100:.1f}%)"
+    )
+
+    print(
+        "\n[Query 2] P(Cough, ChestPain, Fatigue | "
+        "LungCancer='Present', HeartDisease='Absent')"
+    )
+    print(" Given Lung Cancer Present, Heart Disease Absent:")
+    cough_prob = network.query("Cough", evidence={"LungCancer": "Present"})
+    chest_prob = network.query(
+        "ChestPain", evidence={"HeartDisease": "Absent"}
+    )
+    fatigue_prob = network.query(
+        "Fatigue",
+        evidence={"LungCancer": "Present", "HeartDisease": "Absent"},
+    )
+    print(
+        f" P(Cough='Yes') = {cough_prob.get('Yes', 0):.3f} "
+        f"({cough_prob.get('Yes', 0) * 100:.1f}%)"
+    )
+    print(
+        f" P(ChestPain='Yes') = {chest_prob.get('Yes', 0):.3f} "
+        f"({chest_prob.get('Yes', 0) * 100:.1f}%)"
+    )
+    print(
+        f" P(Fatigue='Yes') = {fatigue_prob.get('Yes', 0):.3f} "
+        f"({fatigue_prob.get('Yes', 0) * 100:.1f}%)"
+    )
+
+
+def demonstrate_diagnostic_inference(network: MedicalDiagnosisNetwork):
+    print("\n" + "=" * 70)
+    print(" DIAGNOSTIC INFERENCE (Explanation)")
+    print("=" * 70)
+    print("\n[Query 1] P(Disease | Cough='Yes', Fatigue='Yes')")
+    print(" Patient has cough and fatigue:")
+    evidence = {"Cough": "Yes", "Fatigue": "Yes"}
+    lung_prob = network.query("LungCancer", evidence=evidence)
+    heart_prob = network.query("HeartDisease", evidence=evidence)
+    print(
+        f" P(LungCancer='Present') = {lung_prob.get('Present', 0):.3f} "
+        f"({lung_prob.get('Present', 0) * 100:.1f}%)"
+    )
+    print(
+        f" P(HeartDisease='Present') = {heart_prob.get('Present', 0):.3f} "
+        f"({heart_prob.get('Present', 0) * 100:.1f}%)"
+    )
+
+    print(
+        "\n[Query 2] P(Disease | Cough='Yes', ChestPain='Yes', "
+        "Fatigue='Yes', Fever='Yes')"
+    )
+    print(" Patient has severe symptoms (cough, chest pain, fatigue, fever):")
+    evidence = {
+        "Cough": "Yes",
+        "ChestPain": "Yes",
+        "Fatigue": "Yes",
+        "Fever": "Yes",
+    }
+    lung_prob = network.query("LungCancer", evidence=evidence)
+    heart_prob = network.query("HeartDisease", evidence=evidence)
+    print(
+        f" P(LungCancer='Present') = {lung_prob.get('Present', 0):.3f} "
+        f"({lung_prob.get('Present', 0) * 100:.1f}%)"
+    )
+    print(
+        f" P(HeartDisease='Present') = {heart_prob.get('Present', 0):.3f} "
+        f"({heart_prob.get('Present', 0) * 100:.1f}%)"
+    )
+
+    print("\n[Query 3] P(Smoking='Yes' | LungCancer='Present')")
+    smoking_prob = network.query(
+        "Smoking", evidence={"LungCancer": "Present"}
+    )
+    print(
+        f" P(Smoking='Yes') = {smoking_prob.get('Yes', 0):.3f} "
+        f"({smoking_prob.get('Yes', 0) * 100:.1f}%)"
+    )
+    print(" (Patients with lung cancer are more likely to be smokers)")
+
+
+def demonstrate_intercausal_inference(network: MedicalDiagnosisNetwork):
+    print("\n" + "=" * 70)
+    print(" INTER-CAUSAL INFERENCE")
+    print("=" * 70)
+    print("\n[Query] P(LungCancer='Present' | HeartDisease='Present')")
+    lung_prob = network.query(
+        "LungCancer", evidence={"HeartDisease": "Present"}
+    )
+    print(
+        f" P(LungCancer='Present') = {lung_prob.get('Present', 0):.3f} "
+        f"({lung_prob.get('Present', 0) * 100:.1f}%)"
+    )
+    print(
+        "\n[Query] P(LungCancer='Present' | "
+        "HeartDisease='Present', Smoking='Yes')"
+    )
+    lung_prob = network.query(
+        "LungCancer",
+        evidence={"HeartDisease": "Present", "Smoking": "Yes"},
+    )
+    print(
+        f" P(LungCancer='Present') = {lung_prob.get('Present', 0):.3f} "
+        f"({lung_prob.get('Present', 0) * 100:.1f}%)"
+    )
+
+
+def demonstrate_decision_making(network: MedicalDiagnosisNetwork):
+    print("\n" + "=" * 70)
+    print(" DECISION-MAKING UNDER UNCERTAINTY")
+    print("=" * 70)
+    print("\nScenario: A 65-year-old patient who smokes presents with:")
+    print(" - Chronic cough (Yes)")
+    print(" - Chest pain (Yes)")
+    print(" - Fatigue (Yes)")
+    print(" - No fever")
+    evidence = {
+        "Age": "Old",
+        "Smoking": "Yes",
+        "Cough": "Yes",
+        "ChestPain": "Yes",
+        "Fatigue": "Yes",
+        "Fever": "No",
+    }
+    print("\n[Diagnosis]")
+    lung_prob = network.query("LungCancer", evidence=evidence)
+    heart_prob = network.query("HeartDisease", evidence=evidence)
+    lung_risk = lung_prob.get("Present", 0)
+    heart_risk = heart_prob.get("Present", 0)
+    print(f" Probability of Lung Cancer: {lung_risk * 100:.1f}%")
+    print(f" Probability of Heart Disease: {heart_risk * 100:.1f}%")
+
+    print("\n[Recommended Actions]")
+    if lung_risk > 0.3:
+        print(
+            " High risk of Lung Cancer - Recommend: CT Scan, Biopsy, "
+            "Pulmonology consultation"
+        )
+    else:
+        print(" Low risk of Lung Cancer - Monitor symptoms")
+    if heart_risk > 0.3:
+        print(
+            " High risk of Heart Disease - Recommend: ECG, Echo, "
+            "Cardiology consultation"
+        )
+    else:
+        print(" Low risk of Heart Disease - Monitor symptoms")
+
+    print("\n[Risk Factors]")
+    print(" Age: Old (65+) - Increases risk for both diseases")
+    print(" Smoking: Yes - Major risk factor for Lung Cancer and Heart Disease")
+    print(" Symptoms: Multiple symptoms present - Increases concern")
+    print("\n[Preventive Recommendations]")
+    print(" 1. Quit smoking immediately")
+    print(" 2. Regular health checkups")
+    print(" 3. Healthy diet and exercise")
+    print(" 4. Follow-up in 2 weeks")
+
+
+def compare_inference_types():
+    print("\n" + "=" * 70)
+    print(" COMPARISON OF INFERENCE TYPES")
+    print("=" * 70)
+    print("\n| Inference Type | Description | Example |")
+    print("|----------------|-------------|---------|")
+    print("| Causal (Prediction) | From causes to effects | Given disease, predict symptoms |")
+    print("| Diagnostic (Explanation) | From effects to causes | Given symptoms, diagnose disease |")
+    print("| Inter-causal | Between causes | Disease given another disease |")
+    print("| Mixed | Combination | Disease given symptoms and risk factors |")
+
+
+def main():
+    print("\n" + "=" * 70)
+    print(" EXPERIMENT 3: BAYESIAN NETWORK FOR PROBABILISTIC INFERENCE")
+    print("=" * 70)
+    print("\nProblem: Medical Diagnosis System")
+    print("Using Bayesian Network for disease diagnosis under uncertainty")
+
+    network = MedicalDiagnosisNetwork()
+    network.print_network_structure()
+
+    print("\n" + "=" * 70)
+    print(" CONDITIONAL PROBABILITY TABLES (Sample)")
+    print("=" * 70)
+    network.print_cpt("LungCancer")
+    network.print_cpt("Cough")
+
+    demonstrate_causal_inference(network)
+    demonstrate_diagnostic_inference(network)
+    demonstrate_intercausal_inference(network)
+    demonstrate_decision_making(network)
+    compare_inference_types()
+
+    print("\n" + "=" * 70)
+    print(" SUMMARY")
+    print("=" * 70)
+    print("\nKey Takeaways:")
+    print("1. Bayesian Networks model probabilistic relationships between variables")
+    print("2. CPTs define conditional dependencies in the network")
+    print("3. Inference allows reasoning under uncertainty")
+    print("4. Types of inference: Causal, Diagnostic, Inter-causal, Mixed")
+    print("5. Bayesian Networks are powerful for medical diagnosis, risk assessment,")
+    print(" and decision-making under uncertainty")
+    print("\n" + "=" * 70)
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+7. Self-Driving Car
+from dataclasses import dataclass
+from typing import List
+PROBLEM = "Self-Driving Car"
+DESCRIPTION = "Autonomous vehicle navigating urban roads with traffic, pedestrians and obstacles."
+PEAS = {
+"Performance Measure": ['Safety (zero accidents)', 'Time efficiency', 'Passenger comfort', 'Fuel efficiency'],
+    "Environment": "Urban roads with traffic, pedestrians and obstacles",
+    "Actuators": ['Steering wheel', 'Brakes', 'Accelerator', 'Turn signals'],
+    "Sensors": ['Cameras', 'LIDAR', 'Radar', 'GPS', 'IMU', 'Speed sensors'],
+}
+@dataclass
+class Environment:
+    fully_observable: bool
+    deterministic: bool
+    episodic: bool
+    static: bool
+    discrete: bool
+    single_agent: bool
+    known: bool
+    def describe(self):
+        return {
+            "Observability": "Fully Observable" if self.fully_observable else "Partially Observable",
+            "Determinism": "Deterministic" if self.deterministic else "Stochastic",
+            "Episodicity": "Episodic" if self.episodic else "Sequential",
+            "Dynamics": "Static" if self.static else "Dynamic",
+            "State Space": "Discrete" if self.discrete else "Continuous",
+            "Agents": "Single-Agent" if self.single_agent else "Multi-Agent",
+            "Knowledge": "Known" if self.known else "Unknown",
+        }
+    def complexity(self):
+        score = 0
+        score += 0 if self.fully_observable else 2
+        score += 0 if self.deterministic else 2
+        score += 0 if self.episodic else 2
+        score += 0 if self.static else 2
+        score += 0 if self.discrete else 1
+        score += 0 if self.single_agent else 2
+        score += 0 if self.known else 1
+        return min(score, 10)
+ENV = Environment(
+    fully_observable=False, deterministic=False, episodic=False,
+    static=False, discrete=False, single_agent=True, known=True,
+)
+ARCHITECTURES = {
+    "Simple Reflex Agent": "Condition-action rules on the current percept only.",
+    "Model-Based Reflex Agent": "Keeps an internal state to cope with partial observability.",
+    "Goal-Based Agent": "Plans / searches for action sequences that reach a goal.",
+    "Utility-Based Agent": "Maximises a utility function to trade off several objectives.",
+    "Learning Agent": "Improves its behaviour from experience; suits unknown settings.",
+}
+def score_architectures(env: Environment, n_components: int):
+    s = dict.fromkeys(ARCHITECTURES, 0)
+    if env.fully_observable:
+        s["Simple Reflex Agent"] += 3; s["Model-Based Reflex Agent"] += 2
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 1
+    if env.deterministic:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Learning Agent"] += 3; s["Utility-Based Agent"] += 2
+    if env.episodic:
+        s["Simple Reflex Agent"] += 2; s["Learning Agent"] += 1
+    else:
+        s["Goal-Based Agent"] += 3
+    if env.static:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Learning Agent"] += 2
+    if not env.discrete:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    if not env.single_agent:
+        s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 2; s["Learning Agent"] += 1
+    if not env.known:
+        s["Learning Agent"] += 3
+    if n_components > 5:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    return s
+def insights(env: Environment) -> List[str]:
+    out = []
+    if not env.fully_observable: out.append("Maintain an internal state / belief model.")
+    if not env.deterministic: out.append("Reason with probabilities; outcomes are uncertain.")
+    if not env.episodic: out.append("Plan ahead - current actions affect future states.")
+    if not env.static: out.append("Respond quickly; the world changes while the agent thinks.")
+    if not env.discrete: out.append("Handle continuous percepts and actions.")
+    if not env.single_agent: out.append("Model other agents (cooperation or competition).")
+    if not env.known: out.append("Explore and learn the environment dynamics.")
+    return out
+def main():
+    line = "=" * 74
+    print(line); print(f" PEAS ANALYSIS REPORT : {PROBLEM}"); print(line)
+    print("\nDescription:", DESCRIPTION)
+    print("\n[ PEAS ]"); print("-" * 74)
+    for key, val in PEAS.items():
+        print(f" {key:<20}: {', '.join(val) if isinstance(val, list) else val}")
+    print("\n[ TASK ENVIRONMENT ]"); print("-" * 74)
+    for key, val in ENV.describe().items():
+        print(f" {key:<20}: {val}")
+    print(f" {'Complexity Score':<20}: {ENV.complexity()}/10")
+    n = len(PEAS["Sensors"]) + len(PEAS["Actuators"])
+    scores = score_architectures(ENV, n)
+    order = list(ARCHITECTURES)
+    ranked = sorted(scores.items(), key=lambda kv: (kv[1], order.index(kv[0])), reverse=True)
+    print("\n[ ARCHITECTURE SCORES ]"); print("-" * 74)
+    for name, sc in ranked:
+        print(f" {name:<26} {'#' * sc:<22} {sc}")
+    best, alt = ranked[0], ranked[1]
+    print("\n[ RECOMMENDATION ]"); print("-" * 74)
+    print(f" Recommended : {best[0]} (score {best[1]})")
+    print(f" Why : {ARCHITECTURES[best[0]]}")
+    print(f" Alternative : {alt[0]} (score {alt[1]})")
+    print("\n[ DESIGN INSIGHTS ]"); print("-" * 74)
+    for tip in insights(ENV):
+        print(" -", tip)
+    print(line)
+if __name__ == "__main__":
+    main()
+
+
+
+
+8. Chess AI
+from dataclasses import dataclass
+from typing import List
+PROBLEM = "Chess AI"
+DESCRIPTION = "AI system that plays chess at a competitive level."
+PEAS = {
+    "Performance Measure": ['Win rate against opponents', 'Move quality', 'Decision time'],
+    "Environment": "8x8 chess board with pieces",
+    "Actuators": ['Move piece to square', "Capture opponent's piece", 'Castle', 'Pawn promotion'],
+    "Sensors": ['Board state', 'Piece positions', 'Game history'],
+}
+@dataclass
+class Environment:
+    fully_observable: bool
+    deterministic: bool
+    episodic: bool
+    static: bool
+    discrete: bool
+    single_agent: bool
+    known: bool
+    def describe(self):
+        return {
+            "Observability": "Fully Observable" if self.fully_observable else "Partially Observable",
+            "Determinism": "Deterministic" if self.deterministic else "Stochastic",
+            "Episodicity": "Episodic" if self.episodic else "Sequential",
+            "Dynamics": "Static" if self.static else "Dynamic",
+            "State Space": "Discrete" if self.discrete else "Continuous",
+            "Agents": "Single-Agent" if self.single_agent else "Multi-Agent",
+            "Knowledge": "Known" if self.known else "Unknown",
+        }
+    def complexity(self):
+        score = 0
+        score += 0 if self.fully_observable else 2
+        score += 0 if self.deterministic else 2
+        score += 0 if self.episodic else 2
+        score += 0 if self.static else 2
+        score += 0 if self.discrete else 1
+        score += 0 if self.single_agent else 2
+        score += 0 if self.known else 1
+        return min(score, 10)
+ENV = Environment(
+    fully_observable=True, deterministic=True, episodic=False,
+    static=True, discrete=True, single_agent=False, known=True,
+)
+ARCHITECTURES = {
+    "Simple Reflex Agent": "Condition-action rules on the current percept only.",
+    "Model-Based Reflex Agent": "Keeps an internal state to cope with partial observability.",
+    "Goal-Based Agent": "Plans / searches for action sequences that reach a goal.",
+    "Utility-Based Agent": "Maximises a utility function to trade off several objectives.",
+    "Learning Agent": "Improves its behaviour from experience; suits unknown settings.",
+}
+def score_architectures(env: Environment, n_components: int):
+    s = dict.fromkeys(ARCHITECTURES, 0)
+    if env.fully_observable:
+        s["Simple Reflex Agent"] += 3; s["Model-Based Reflex Agent"] += 2
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 1
+    if env.deterministic:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Learning Agent"] += 3; s["Utility-Based Agent"] += 2
+    if env.episodic:
+        s["Simple Reflex Agent"] += 2; s["Learning Agent"] += 1
+    else:
+        s["Goal-Based Agent"] += 3
+    if env.static:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Learning Agent"] += 2
+    if not env.discrete:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    if not env.single_agent:
+        s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 2; s["Learning Agent"] += 1
+    if not env.known:
+        s["Learning Agent"] += 3
+    if n_components > 5:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    return s
+def insights(env: Environment) -> List[str]:
+    out = []
+    if not env.fully_observable: out.append("Maintain an internal state / belief model.")
+    if not env.deterministic: out.append("Reason with probabilities; outcomes are uncertain.")
+    if not env.episodic: out.append("Plan ahead - current actions affect future states.")
+    if not env.static: out.append("Respond quickly; the world changes while the agent thinks.")
+    if not env.discrete: out.append("Handle continuous percepts and actions.")
+    if not env.single_agent: out.append("Model other agents (cooperation or competition).")
+    if not env.known: out.append("Explore and learn the environment dynamics.")
+    return out
+def main():
+    line = "=" * 74
+    print(line); print(f" PEAS ANALYSIS REPORT : {PROBLEM}"); print(line)
+    print("\nDescription:", DESCRIPTION)
+    print("\n[ PEAS ]"); print("-" * 74)
+    for key, val in PEAS.items():
+        print(f" {key:<20}: {', '.join(val) if isinstance(val, list) else val}")
+    print("\n[ TASK ENVIRONMENT ]"); print("-" * 74)
+    for key, val in ENV.describe().items():
+        print(f" {key:<20}: {val}")
+    print(f" {'Complexity Score':<20}: {ENV.complexity()}/10")
+    n = len(PEAS["Sensors"]) + len(PEAS["Actuators"])
+    scores = score_architectures(ENV, n)
+    order = list(ARCHITECTURES)
+    ranked = sorted(scores.items(), key=lambda kv: (kv[1], order.index(kv[0])), reverse=True)
+    print("\n[ ARCHITECTURE SCORES ]"); print("-" * 74)
+    for name, sc in ranked:
+        print(f" {name:<26} {'#' * sc:<22} {sc}")
+    best, alt = ranked[0], ranked[1]
+    print("\n[ RECOMMENDATION ]"); print("-" * 74)
+    print(f" Recommended : {best[0]} (score {best[1]})")
+    print(f" Why : {ARCHITECTURES[best[0]]}")
+    print(f" Alternative : {alt[0]} (score {alt[1]})")
+    print("\n[ DESIGN INSIGHTS ]"); print("-" * 74)
+    for tip in insights(ENV):
+        print(" -", tip)
+    print(line)
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+9. Recommendation System
+from dataclasses import dataclass
+from typing import List
+PROBLEM = "Recommendation System"
+DESCRIPTION = "Personalised product recommendation engine for an e-commerce platform."
+PEAS = {
+"Performance Measure": ['User engagement', 'Revenue', 'User satisfaction', 'Novelty of recommendations'],
+    "Environment": "E-commerce platform with user interactions",
+    "Actuators": ['Show product recommendations', 'Personalise content', 'Send notifications'],
+"Sensors": ['User click data', 'Purchase history', 'Search queries', 'User demographics', 'Time spenton pages'],
+}
+@dataclass
+class Environment:
+    fully_observable: bool
+    deterministic: bool
+    episodic: bool
+    static: bool
+    discrete: bool
+    single_agent: bool
+    known: bool
+    def describe(self):
+        return {
+            "Observability": "Fully Observable" if self.fully_observable else "Partially Observable",
+            "Determinism": "Deterministic" if self.deterministic else "Stochastic",
+            "Episodicity": "Episodic" if self.episodic else "Sequential",
+            "Dynamics": "Static" if self.static else "Dynamic",
+            "State Space": "Discrete" if self.discrete else "Continuous",
+            "Agents": "Single-Agent" if self.single_agent else "Multi-Agent",
+            "Knowledge": "Known" if self.known else "Unknown",
+        }
+    def complexity(self):
+        score = 0
+        score += 0 if self.fully_observable else 2
+        score += 0 if self.deterministic else 2
+        score += 0 if self.episodic else 2
+        score += 0 if self.static else 2
+        score += 0 if self.discrete else 1
+        score += 0 if self.single_agent else 2
+        score += 0 if self.known else 1
+        return min(score, 10)
+ENV = Environment(
+    fully_observable=False, deterministic=False, episodic=True,
+    static=False, discrete=False, single_agent=True, known=False,
+)
+ARCHITECTURES = {
+    "Simple Reflex Agent": "Condition-action rules on the current percept only.",
+    "Model-Based Reflex Agent": "Keeps an internal state to cope with partial observability.",
+    "Goal-Based Agent": "Plans / searches for action sequences that reach a goal.",
+    "Utility-Based Agent": "Maximises a utility function to trade off several objectives.",
+    "Learning Agent": "Improves its behaviour from experience; suits unknown settings.",
+}
+def score_architectures(env: Environment, n_components: int):
+    s = dict.fromkeys(ARCHITECTURES, 0)
+    if env.fully_observable:
+        s["Simple Reflex Agent"] += 3; s["Model-Based Reflex Agent"] += 2
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 1
+    if env.deterministic:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Learning Agent"] += 3; s["Utility-Based Agent"] += 2
+    if env.episodic:
+        s["Simple Reflex Agent"] += 2; s["Learning Agent"] += 1
+    else:
+        s["Goal-Based Agent"] += 3
+    if env.static:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Learning Agent"] += 2
+    if not env.discrete:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    if not env.single_agent:
+        s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 2; s["Learning Agent"] += 1
+    if not env.known:
+        s["Learning Agent"] += 3
+    if n_components > 5:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    return s
+def insights(env: Environment) -> List[str]:
+    out = []
+    if not env.fully_observable: out.append("Maintain an internal state / belief model.")
+    if not env.deterministic: out.append("Reason with probabilities; outcomes are uncertain.")
+    if not env.episodic: out.append("Plan ahead - current actions affect future states.")
+    if not env.static: out.append("Respond quickly; the world changes while the agent thinks.")
+    if not env.discrete: out.append("Handle continuous percepts and actions.")
+    if not env.single_agent: out.append("Model other agents (cooperation or competition).")
+    if not env.known: out.append("Explore and learn the environment dynamics.")
+    return out
+def main():
+    line = "=" * 74
+    print(line); print(f" PEAS ANALYSIS REPORT : {PROBLEM}"); print(line)
+    print("\nDescription:", DESCRIPTION)
+    print("\n[ PEAS ]"); print("-" * 74)
+    for key, val in PEAS.items():
+        print(f" {key:<20}: {', '.join(val) if isinstance(val, list) else val}")
+    print("\n[ TASK ENVIRONMENT ]"); print("-" * 74)
+    for key, val in ENV.describe().items():
+        print(f" {key:<20}: {val}")
+    print(f" {'Complexity Score':<20}: {ENV.complexity()}/10")
+    n = len(PEAS["Sensors"]) + len(PEAS["Actuators"])
+    scores = score_architectures(ENV, n)
+    order = list(ARCHITECTURES)
+    ranked = sorted(scores.items(), key=lambda kv: (kv[1], order.index(kv[0])), reverse=True)
+    print("\n[ ARCHITECTURE SCORES ]"); print("-" * 74)
+    for name, sc in ranked:
+        print(f" {name:<26} {'#' * sc:<22} {sc}")
+    best, alt = ranked[0], ranked[1]
+    print("\n[ RECOMMENDATION ]"); print("-" * 74)
+    print(f" Recommended : {best[0]} (score {best[1]})")
+    print(f" Why : {ARCHITECTURES[best[0]]}")
+    print(f" Alternative : {alt[0]} (score {alt[1]})")
+    print("\n[ DESIGN INSIGHTS ]"); print("-" * 74)
+    for tip in insights(ENV):
+        print(" -", tip)
+    print(line)
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+10. Medical Diagnosis Assistant
+from dataclasses import dataclass
+from typing import List
+PROBLEM = "Medical Diagnosis Assistant"
+DESCRIPTION = "AI system that assists doctors in diagnosing diseases and recommending treatments."
+PEAS = {
+"Performance Measure": ['Diagnostic accuracy', 'Speed of diagnosis', 'Treatment recommendation quality', 'Patient safety'],
+    "Environment": "Clinical setting with patient data and medical knowledge",
+    "Actuators": ['Display diagnosis', 'Recommend tests', 'Suggest treatments', 'Alert about risks'],
+"Sensors": ['Patient symptoms', 'Medical history', 'Test results', 'Vital signs', 'Lifestyle factors'],
+}
+@dataclass
+class Environment:
+    fully_observable: bool
+    deterministic: bool
+    episodic: bool
+    static: bool
+    discrete: bool
+    single_agent: bool
+    known: bool
+    def describe(self):
+        return {
+            "Observability": "Fully Observable" if self.fully_observable else "Partially Observable",
+            "Determinism": "Deterministic" if self.deterministic else "Stochastic",
+            "Episodicity": "Episodic" if self.episodic else "Sequential",
+            "Dynamics": "Static" if self.static else "Dynamic",
+            "State Space": "Discrete" if self.discrete else "Continuous",
+            "Agents": "Single-Agent" if self.single_agent else "Multi-Agent",
+            "Knowledge": "Known" if self.known else "Unknown",
+        }
+    def complexity(self):
+        score = 0
+        score += 0 if self.fully_observable else 2
+        score += 0 if self.deterministic else 2
+        score += 0 if self.episodic else 2
+        score += 0 if self.static else 2
+        score += 0 if self.discrete else 1
+        score += 0 if self.single_agent else 2
+        score += 0 if self.known else 1
+        return min(score, 10)
+ENV = Environment(
+    fully_observable=False, deterministic=False, episodic=False,
+    static=True, discrete=True, single_agent=True, known=True,
+)
+ARCHITECTURES = {
+    "Simple Reflex Agent": "Condition-action rules on the current percept only.",
+    "Model-Based Reflex Agent": "Keeps an internal state to cope with partial observability.",
+    "Goal-Based Agent": "Plans / searches for action sequences that reach a goal.",
+    "Utility-Based Agent": "Maximises a utility function to trade off several objectives.",
+    "Learning Agent": "Improves its behaviour from experience; suits unknown settings.",
+}
+def score_architectures(env: Environment, n_components: int):
+    s = dict.fromkeys(ARCHITECTURES, 0)
+    if env.fully_observable:
+        s["Simple Reflex Agent"] += 3; s["Model-Based Reflex Agent"] += 2
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 1
+    if env.deterministic:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Learning Agent"] += 3; s["Utility-Based Agent"] += 2
+    if env.episodic:
+        s["Simple Reflex Agent"] += 2; s["Learning Agent"] += 1
+    else:
+        s["Goal-Based Agent"] += 3
+    if env.static:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Learning Agent"] += 2
+    if not env.discrete:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    if not env.single_agent:
+        s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 2; s["Learning Agent"] += 1
+    if not env.known:
+        s["Learning Agent"] += 3
+    if n_components > 5:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    return s
+def insights(env: Environment) -> List[str]:
+    out = []
+    if not env.fully_observable: out.append("Maintain an internal state / belief model.")
+    if not env.deterministic: out.append("Reason with probabilities; outcomes are uncertain.")
+    if not env.episodic: out.append("Plan ahead - current actions affect future states.")
+    if not env.static: out.append("Respond quickly; the world changes while the agent thinks.")
+    if not env.discrete: out.append("Handle continuous percepts and actions.")
+    if not env.single_agent: out.append("Model other agents (cooperation or competition).")
+    if not env.known: out.append("Explore and learn the environment dynamics.")
+    return out
+def main():
+    line = "=" * 74
+    print(line); print(f" PEAS ANALYSIS REPORT : {PROBLEM}"); print(line)
+    print("\nDescription:", DESCRIPTION)
+    print("\n[ PEAS ]"); print("-" * 74)
+    for key, val in PEAS.items():
+        print(f" {key:<20}: {', '.join(val) if isinstance(val, list) else val}")
+    print("\n[ TASK ENVIRONMENT ]"); print("-" * 74)
+    for key, val in ENV.describe().items():
+        print(f" {key:<20}: {val}")
+    print(f" {'Complexity Score':<20}: {ENV.complexity()}/10")
+    n = len(PEAS["Sensors"]) + len(PEAS["Actuators"])
+    scores = score_architectures(ENV, n)
+    order = list(ARCHITECTURES)
+    ranked = sorted(scores.items(), key=lambda kv: (kv[1], order.index(kv[0])), reverse=True)
+    print("\n[ ARCHITECTURE SCORES ]"); print("-" * 74)
+    for name, sc in ranked:
+        print(f" {name:<26} {'#' * sc:<22} {sc}")
+    best, alt = ranked[0], ranked[1]
+    print("\n[ RECOMMENDATION ]"); print("-" * 74)
+    print(f" Recommended : {best[0]} (score {best[1]})")
+    print(f" Why : {ARCHITECTURES[best[0]]}")
+    print(f" Alternative : {alt[0]} (score {alt[1]})")
+    print("\n[ DESIGN INSIGHTS ]"); print("-" * 74)
+    for tip in insights(ENV):
+        print(" -", tip)
+    print(line)
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+11. Pac-Man Agent
+from dataclasses import dataclass
+from typing import List
+PROBLEM = "Pac-Man Agent"
+DESCRIPTION = "AI agent that plays Pac-Man and maximises its score."
+PEAS = {
+    "Performance Measure": ['Score obtained', 'Survival time', 'Ghosts eaten', 'Pellets collected'],
+    "Environment": "Maze with ghosts and pellets",
+    "Actuators": ['Move Up', 'Move Down', 'Move Left', 'Move Right'],
+    "Sensors": ['Current position', 'Ghost positions', 'Pellet positions', 'Power-up availability'],
+}
+@dataclass
+class Environment:
+    fully_observable: bool
+    deterministic: bool
+    episodic: bool
+    static: bool
+    discrete: bool
+    single_agent: bool
+    known: bool
+    def describe(self):
+        return {
+            "Observability": "Fully Observable" if self.fully_observable else "Partially Observable",
+            "Determinism": "Deterministic" if self.deterministic else "Stochastic",
+            "Episodicity": "Episodic" if self.episodic else "Sequential",
+            "Dynamics": "Static" if self.static else "Dynamic",
+            "State Space": "Discrete" if self.discrete else "Continuous",
+            "Agents": "Single-Agent" if self.single_agent else "Multi-Agent",
+            "Knowledge": "Known" if self.known else "Unknown",
+        }
+    def complexity(self):
+        score = 0
+        score += 0 if self.fully_observable else 2
+        score += 0 if self.deterministic else 2
+        score += 0 if self.episodic else 2
+        score += 0 if self.static else 2
+        score += 0 if self.discrete else 1
+        score += 0 if self.single_agent else 2
+        score += 0 if self.known else 1
+        return min(score, 10)
+ENV = Environment(
+    fully_observable=True, deterministic=False, episodic=False,
+    static=False, discrete=True, single_agent=False, known=True,
+)
+ARCHITECTURES = {
+    "Simple Reflex Agent": "Condition-action rules on the current percept only.",
+    "Model-Based Reflex Agent": "Keeps an internal state to cope with partial observability.",
+    "Goal-Based Agent": "Plans / searches for action sequences that reach a goal.",
+    "Utility-Based Agent": "Maximises a utility function to trade off several objectives.",
+    "Learning Agent": "Improves its behaviour from experience; suits unknown settings.",
+}
+def score_architectures(env: Environment, n_components: int):
+    s = dict.fromkeys(ARCHITECTURES, 0)
+    if env.fully_observable:
+        s["Simple Reflex Agent"] += 3; s["Model-Based Reflex Agent"] += 2
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 1
+    if env.deterministic:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Learning Agent"] += 3; s["Utility-Based Agent"] += 2
+    if env.episodic:
+        s["Simple Reflex Agent"] += 2; s["Learning Agent"] += 1
+    else:
+        s["Goal-Based Agent"] += 3
+    if env.static:
+        s["Simple Reflex Agent"] += 2; s["Goal-Based Agent"] += 1
+    else:
+        s["Model-Based Reflex Agent"] += 3; s["Learning Agent"] += 2
+    if not env.discrete:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    if not env.single_agent:
+        s["Goal-Based Agent"] += 2; s["Utility-Based Agent"] += 2; s["Learning Agent"] += 1
+    if not env.known:
+        s["Learning Agent"] += 3
+    if n_components > 5:
+        s["Utility-Based Agent"] += 2; s["Learning Agent"] += 2
+    return s
+def insights(env: Environment) -> List[str]:
+    out = []
+    if not env.fully_observable: out.append("Maintain an internal state / belief model.")
+    if not env.deterministic: out.append("Reason with probabilities; outcomes are uncertain.")
+    if not env.episodic: out.append("Plan ahead - current actions affect future states.")
+    if not env.static: out.append("Respond quickly; the world changes while the agent thinks.")
+    if not env.discrete: out.append("Handle continuous percepts and actions.")
+    if not env.single_agent: out.append("Model other agents (cooperation or competition).")
+    if not env.known: out.append("Explore and learn the environment dynamics.")
+    return out
+def main():
+    line = "=" * 74
+    print(line); print(f" PEAS ANALYSIS REPORT : {PROBLEM}"); print(line)
+    print("\nDescription:", DESCRIPTION)
+    print("\n[ PEAS ]"); print("-" * 74)
+    for key, val in PEAS.items():
+        print(f" {key:<20}: {', '.join(val) if isinstance(val, list) else val}")
+    print("\n[ TASK ENVIRONMENT ]"); print("-" * 74)
+    for key, val in ENV.describe().items():
+        print(f" {key:<20}: {val}")
+    print(f" {'Complexity Score':<20}: {ENV.complexity()}/10")
+    n = len(PEAS["Sensors"]) + len(PEAS["Actuators"])
+    scores = score_architectures(ENV, n)
+    order = list(ARCHITECTURES)
+    ranked = sorted(scores.items(), key=lambda kv: (kv[1], order.index(kv[0])), reverse=True)
+    print("\n[ ARCHITECTURE SCORES ]"); print("-" * 74)
+    for name, sc in ranked:
+        print(f" {name:<26} {'#' * sc:<22} {sc}")
+    best, alt = ranked[0], ranked[1]
+    print("\n[ RECOMMENDATION ]"); print("-" * 74)
+    print(f" Recommended : {best[0]} (score {best[1]})")
+    print(f" Why : {ARCHITECTURES[best[0]]}")
+    print(f" Alternative : {alt[0]} (score {alt[1]})")
+    print("\n[ DESIGN INSIGHTS ]"); print("-" * 74)
+    for tip in insights(ENV):
+        print(" -", tip)
+    print(line)
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+12. Family Relationships Knowledge Base
+from typing import Dict, List, Optional, Set
+
+
+class LogicalExpression:
+    pass
+
+
+class Fact(LogicalExpression):
+    def __init__(self, name: str, args: Optional[List[str]] = None):
+        self.name = name
+        self.args = args or []
+
+    def __str__(self):
+        if self.args:
+            return f"{self.name}({', '.join(self.args)})"
+        return self.name
+
+    def __eq__(self, other):
+        return isinstance(other, Fact) and self.name == other.name and self.args == other.args
+
+    def __hash__(self):
+        return hash((self.name, tuple(self.args)))
+
+    def __repr__(self):
+        return str(self)
+
+
+class Rule(LogicalExpression):
+    def __init__(self, premises: List[Fact], conclusion: Fact, name: str = ""):
+        self.premises = premises
+        self.conclusion = conclusion
+        self.name = name or f"Rule_{id(self)}"
+
+    def __str__(self):
+        premises_str = " and ".join(str(premise) for premise in self.premises)
+        return f"{premises_str} -> {self.conclusion}"
+
+    def __repr__(self):
+        return str(self)
+
+
+class KnowledgeBase:
+    def __init__(self):
+        self.facts: Set[Fact] = set()
+        self.rules: List[Rule] = []
+        self.inference_count = 0
+        self._rule_counter = 0
+
+    def add_fact(self, fact: Fact):
+        self.facts.add(fact)
+
+    def add_facts(self, facts: List[Fact]):
+        for fact in facts:
+            self.add_fact(fact)
+
+    def add_rule(self, rule: Rule):
+        self.rules.append(rule)
+
+    def add_rules(self, rules: List[Rule]):
+        for rule in rules:
+            self.add_rule(rule)
+
+    @staticmethod
+    def is_variable(value: str) -> bool:
+        return value.startswith("?") or value.isupper()
+
+    def fact_matches(self, fact: Fact, pattern: Fact) -> bool:
+        return fact.name == pattern.name and len(fact.args) == len(pattern.args)
+
+    def substitute(self, pattern: Fact, substitution: Dict[str, str]) -> Fact:
+        def resolve(arg: str) -> str:
+            seen = set()
+            while arg in substitution and arg not in seen:
+                seen.add(arg)
+                arg = substitution[arg]
+            return arg
+
+        args = [resolve(arg) for arg in pattern.args]
+        return Fact(pattern.name, args)
+
+    def unify(self, pattern: Fact, fact: Fact) -> Optional[Dict[str, str]]:
+        if not self.fact_matches(fact, pattern):
+            return None
+
+        substitution: Dict[str, str] = {}
+        for pattern_arg, fact_arg in zip(pattern.args, fact.args):
+            if self.is_variable(pattern_arg):
+                existing = substitution.get(pattern_arg)
+                if existing is not None and existing != fact_arg:
+                    return None
+                substitution[pattern_arg] = fact_arg
+            elif pattern_arg != fact_arg:
+                return None
+        return substitution
+
+    def _extend_substitutions(
+        self, premise: Fact, substitutions: List[Dict[str, str]]
+    ) -> List[Dict[str, str]]:
+        extended = []
+        for substitution in substitutions:
+            grounded_premise = self.substitute(premise, substitution)
+            if grounded_premise.name == "not_equal":
+                if (
+                    len(grounded_premise.args) == 2
+                    and all(not self.is_variable(arg) for arg in grounded_premise.args)
+                    and grounded_premise.args[0] != grounded_premise.args[1]
+                ):
+                    extended.append(substitution)
+                continue
+
+            for fact in self.facts:
+                match = self.unify(grounded_premise, fact)
+                if match is not None:
+                    combined = substitution.copy()
+                    combined.update(match)
+                    extended.append(combined)
+        return extended
+
+    def apply_rule_forward(self, rule: Rule) -> List[Fact]:
+        substitutions = [{}]
+        for premise in rule.premises:
+            substitutions = self._extend_substitutions(premise, substitutions)
+            if not substitutions:
+                return []
+
+        conclusions = []
+        for substitution in substitutions:
+            conclusion = self.substitute(rule.conclusion, substitution)
+            if conclusion not in self.facts and conclusion not in conclusions:
+                conclusions.append(conclusion)
+        return conclusions
+
+    def forward_chaining(self, max_iterations: int = 100) -> Set[Fact]:
+        derived: Set[Fact] = set()
+        for _ in range(max_iterations):
+            new_facts = []
+            for rule in self.rules:
+                for conclusion in self.apply_rule_forward(rule):
+                    if conclusion not in self.facts and conclusion not in new_facts:
+                        new_facts.append(conclusion)
+            if not new_facts:
+                break
+            for fact in new_facts:
+                self.facts.add(fact)
+                derived.add(fact)
+                self.inference_count += 1
+        return derived
+
+    def _rename_rule(self, rule: Rule) -> Rule:
+        prefix = f"?rule{self._rule_counter}_"
+        self._rule_counter += 1
+        variables = {
+            arg
+            for fact in rule.premises + [rule.conclusion]
+            for arg in fact.args
+            if self.is_variable(arg)
+        }
+        substitution = {variable: prefix + variable for variable in variables}
+        premises = [self.substitute(fact, substitution) for fact in rule.premises]
+        conclusion = self.substitute(rule.conclusion, substitution)
+        return Rule(premises, conclusion, rule.name)
+
+    def _goal_signature(self, goal: Fact) -> Fact:
+        variable_names = {}
+        args = []
+        for arg in goal.args:
+            if self.is_variable(arg):
+                if arg not in variable_names:
+                    variable_names[arg] = f"?{len(variable_names)}"
+                args.append(variable_names[arg])
+            else:
+                args.append(arg)
+        return Fact(goal.name, args)
+
+    def _prove(
+        self,
+        goal: Fact,
+        substitution: Dict[str, str],
+        visited: Set[Fact],
+    ) -> List[Dict[str, str]]:
+        goal = self.substitute(goal, substitution)
+        solutions = []
+
+        if goal.name == "not_equal" and len(goal.args) == 2:
+            if all(not self.is_variable(arg) for arg in goal.args):
+                return [substitution] if goal.args[0] != goal.args[1] else []
+
+        for fact in self.facts:
+            match = self.unify(goal, fact)
+            if match is not None:
+                combined = substitution.copy()
+                combined.update(match)
+                solutions.append(combined)
+
+        signature = self._goal_signature(goal)
+        if signature in visited:
+            return solutions
+        next_visited = visited | {signature}
+
+        for rule in self.rules:
+            renamed_rule = self._rename_rule(rule)
+            match = self.unify(renamed_rule.conclusion, goal)
+            if match is None:
+                continue
+
+            substitutions = [dict(substitution, **match)]
+            for premise in renamed_rule.premises:
+                next_substitutions = []
+                for current in substitutions:
+                    next_substitutions.extend(
+                        self._prove(premise, current, next_visited)
+                    )
+                substitutions = next_substitutions
+                if not substitutions:
+                    break
+
+            if substitutions:
+                self.inference_count += 1
+                solutions.extend(substitutions)
+        return solutions
+
+    def backward_chaining(self, goal: Fact) -> bool:
+        return bool(self._prove(goal, {}, set()))
+
+    def query(self, query: Fact) -> bool:
+        return self.backward_chaining(query)
+
+
+class FamilyKnowledgeBase(KnowledgeBase):
+    def __init__(self):
+        super().__init__()
+        self._build_knowledge_base()
+
+    def _build_knowledge_base(self):
+        self.add_facts(
+            [
+                Fact("parent", ["John", "Mary"]),
+                Fact("parent", ["John", "David"]),
+                Fact("parent", ["Mary", "Alice"]),
+                Fact("parent", ["Mary", "Bob"]),
+                Fact("parent", ["David", "Emma"]),
+                Fact("parent", ["David", "Jack"]),
+                Fact("male", ["John"]),
+                Fact("male", ["David"]),
+                Fact("male", ["Bob"]),
+                Fact("male", ["Jack"]),
+                Fact("female", ["Mary"]),
+                Fact("female", ["Alice"]),
+                Fact("female", ["Emma"]),
+            ]
+        )
+        self.add_rules(
+            [
+                Rule(
+                    [Fact("parent", ["X", "Y"])],
+                    Fact("child", ["Y", "X"]),
+                    "Parent_to_Child",
+                ),
+                Rule(
+                    [Fact("parent", ["X", "Y"]), Fact("male", ["X"])],
+                    Fact("father", ["X", "Y"]),
+                    "Parent_Male_to_Father",
+                ),
+                Rule(
+                    [Fact("parent", ["X", "Y"]), Fact("female", ["X"])],
+                    Fact("mother", ["X", "Y"]),
+                    "Parent_Female_to_Mother",
+                ),
+                Rule(
+                    [Fact("parent", ["X", "Z"]), Fact("parent", ["Z", "Y"])],
+                    Fact("grandparent", ["X", "Y"]),
+                    "Grandparent_1",
+                ),
+                Rule(
+                    [Fact("grandparent", ["X", "Y"])],
+                    Fact("grandchild", ["Y", "X"]),
+                    "Grandchild",
+                ),
+                Rule(
+                    [
+                        Fact("parent", ["Z", "X"]),
+                        Fact("parent", ["Z", "Y"]),
+                        Fact("not_equal", ["X", "Y"]),
+                    ],
+                    Fact("sibling", ["X", "Y"]),
+                    "Sibling",
+                ),
+                Rule(
+                    [Fact("sibling", ["X", "Y"]), Fact("male", ["X"])],
+                    Fact("brother", ["X", "Y"]),
+                    "Brother",
+                ),
+                Rule(
+                    [Fact("sibling", ["X", "Y"]), Fact("female", ["X"])],
+                    Fact("sister", ["X", "Y"]),
+                    "Sister",
+                ),
+                Rule(
+                    [Fact("parent", ["X", "Y"])],
+                    Fact("ancestor", ["X", "Y"]),
+                    "Ancestor_Base",
+                ),
+                Rule(
+                    [
+                        Fact("ancestor", ["X", "Z"]),
+                        Fact("ancestor", ["Z", "Y"]),
+                    ],
+                    Fact("ancestor", ["X", "Y"]),
+                    "Ancestor_Transitive",
+                ),
+                Rule(
+                    [Fact("ancestor", ["X", "Y"])],
+                    Fact("descendant", ["Y", "X"]),
+                    "Descendant",
+                ),
+            ]
+        )
+
+
+class InferenceEngine:
+    def __init__(self, kb: KnowledgeBase):
+        self.kb = kb
+        self.forward_results: Optional[Set[Fact]] = None
+        self.backward_results: Dict[str, bool] = {}
+
+    def run_forward_chaining(self, verbose: bool = True) -> Set[Fact]:
+        print("\n" + "=" * 70)
+        print(" FORWARD CHAINING")
+        print("=" * 70)
+        print(f"\nInitial Facts: {len(self.kb.facts)}")
+        print(f"Rules: {len(self.kb.rules)}")
+        print("\nDeriving new facts...")
+        derived = self.kb.forward_chaining()
+        print("\nForward Chaining Complete")
+        print(f" Total Facts: {len(self.kb.facts)}")
+        print(f" New Facts Derived: {len(derived)}")
+        print(f" Inferences Made: {self.kb.inference_count}")
+        if derived and verbose:
+            print("\nDerived Facts:")
+            for fact in sorted(derived, key=str):
+                print(f" - {fact}")
+        self.forward_results = derived
+        return derived
+
+    def run_backward_chaining(self, goal: Fact, verbose: bool = True) -> bool:
+        print("\n" + "=" * 70)
+        print(" BACKWARD CHAINING")
+        print("=" * 70)
+        self.kb.inference_count = 0
+        print(f"\nGoal: {goal}")
+        if verbose:
+            print("\nTracing proof...")
+        result = self.kb.query(goal)
+        print(f"\nGoal {'Proven' if result else 'Not Proven'}")
+        print(f" Inferences Made: {self.kb.inference_count}")
+        self.backward_results[str(goal)] = result
+        return result
+
+    def compare_inference_methods(self, goals: List[Fact]):
+        print("\n" + "=" * 70)
+        print(" COMPARISON: FORWARD VS BACKWARD CHAINING")
+        print("=" * 70)
+        print("\n| Goal | Forward Chaining | Backward Chaining |")
+        print("|------|------------------|-------------------|")
+        if self.forward_results is None:
+            self.run_forward_chaining(verbose=False)
+        for goal in goals:
+            forward_result = goal in self.kb.facts
+            backward_result = self.kb.backward_chaining(goal)
+            print(
+                f"| {str(goal):<30} | {str(forward_result):<16} "
+                f"| {str(backward_result):<17} |"
+            )
+        print("\nObservations:")
+        print("- Forward Chaining: best for deriving all possible conclusions")
+        print("  Use when you want to know everything that follows from facts")
+        print("  Useful for monitoring systems and data-driven reasoning")
+        print("- Backward Chaining: best for goal-directed reasoning")
+        print("  Use when you have a specific question to answer")
+        print("  Useful for diagnosis and theorem proving")
+
+
+def demonstrate_family_kb():
+    print("\n" + "=" * 70)
+    print(" FAMILY RELATIONSHIPS KNOWLEDGE BASE")
+    print("=" * 70)
+    kb = FamilyKnowledgeBase()
+    engine = InferenceEngine(kb)
+    print("\nKnowledge Base Summary:")
+    print(f" Facts: {len(kb.facts)}")
+    print(f" Rules: {len(kb.rules)}")
+    print("\nFacts:")
+    for fact in sorted(kb.facts, key=str):
+        print(f" - {fact}")
+    print("\nRules:")
+    for rule in kb.rules:
+        print(f" - {rule}")
+    engine.run_forward_chaining()
+
+    goals = [
+        Fact("father", ["John", "Mary"]),
+        Fact("mother", ["Mary", "Alice"]),
+        Fact("grandparent", ["John", "Alice"]),
+        Fact("sibling", ["Alice", "Bob"]),
+        Fact("brother", ["Bob", "Alice"]),
+        Fact("ancestor", ["John", "Emma"]),
+        Fact("ancestor", ["Mary", "Jack"]),
+    ]
+    print("\n" + "=" * 70)
+    print(" BACKWARD CHAINING QUERIES")
+    print("=" * 70)
+    for goal in goals:
+        engine.run_backward_chaining(goal)
+    engine.compare_inference_methods(goals)
+
+
+def main():
+    print("\n" + "=" * 80)
+    print(" EXPERIMENT 5A: FAMILY RELATIONSHIPS KNOWLEDGE BASE")
+    print("=" * 80)
+    print("\nTHEORETICAL BACKGROUND:")
+    print("-" * 40)
+    print("\nPropositional Logic:")
+    print(" - Propositions: statements that are true or false")
+    print(" - Connectives: NOT, AND, OR, implies, and iff")
+    print(" - Example: (Rain AND Cold) implies WearCoat")
+    print("\nFirst-Order Logic (FOL):")
+    print(" - Constants: John, Paris, 5")
+    print(" - Variables: x, y, z")
+    print(" - Predicates: Human(x), Likes(x, y)")
+    print(" - Quantifiers: for all, there exists")
+    print(" - Example: for all x, Human(x) implies Mortal(x)")
+    print("\nInference Methods:")
+    print(" - Forward Chaining: data-driven, starts with facts")
+    print(" - Backward Chaining: goal-driven, starts with a goal")
+    demonstrate_family_kb()
+    print("\n" + "=" * 80)
+    print(" SUMMARY")
+    print("=" * 80)
+    print("\nKey Takeaways:")
+    print("1. Logic provides formal knowledge representation")
+    print("2. Forward Chaining derives conclusions from facts")
+    print("3. Backward Chaining proves specific goals using rules")
+    print("4. Knowledge bases combine facts and rules for reasoning")
+    print("5. Both inference methods have specific use cases")
+    print("\nWhen to Use:")
+    print(" - Forward Chaining: data-driven applications, monitoring systems")
+    print(" - Backward Chaining: diagnostic systems, question answering")
+    print("\nAdvantages:")
+    print(" - Formal and precise knowledge representation")
+    print(" - Sound inference mechanisms")
+    print(" - Explainable conclusions")
+    print(" - Modular knowledge base")
+    print("\nLimitations:")
+    print(" - Expressive limitations compared to full FOL")
+    print(" - Can be computationally expensive")
+    print(" - Requires knowledge-engineering expertise")
+    print(" - Handling uncertainty is difficult")
+    print("\n" + "=" * 80)
+    print("EXPERIMENT COMPLETE")
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+13. Medical Diagnosis Knowledge Base
+from typing import Dict, List, Optional, Set
+
+
+class LogicalExpression:
+    pass
+
+
+class Fact(LogicalExpression):
+    def __init__(self, name: str, args: Optional[List[str]] = None):
+        self.name = name
+        self.args = tuple(args or [])
+
+    def __str__(self):
+        if self.args:
+            return f"{self.name}({', '.join(self.args)})"
+        return self.name
+
+    def __eq__(self, other):
+        return isinstance(other, Fact) and self.name == other.name and self.args == other.args
+
+    def __hash__(self):
+        return hash((self.name, self.args))
+
+    def __repr__(self):
+        return str(self)
+
+
+class Rule(LogicalExpression):
+    def __init__(self, premises: List[Fact], conclusion: Fact, name: str = ""):
+        self.premises = premises
+        self.conclusion = conclusion
+        self.name = name or f"Rule_{id(self)}"
+
+    def __str__(self):
+        premises = " and ".join(str(premise) for premise in self.premises)
+        return f"{premises} -> {self.conclusion}"
+
+    def __repr__(self):
+        return str(self)
+
+
+class KnowledgeBase:
+    def __init__(self):
+        self.facts: Set[Fact] = set()
+        self.rules: List[Rule] = []
+        self.inference_count = 0
+        self._rule_counter = 0
+
+    def add_fact(self, fact: Fact):
+        self.facts.add(fact)
+
+    def add_facts(self, facts: List[Fact]):
+        for fact in facts:
+            self.add_fact(fact)
+
+    def add_rule(self, rule: Rule):
+        self.rules.append(rule)
+
+    def add_rules(self, rules: List[Rule]):
+        for rule in rules:
+            self.add_rule(rule)
+
+    @staticmethod
+    def is_variable(value: str) -> bool:
+        return value.startswith("?") or value.isupper()
+
+    def substitute(self, fact: Fact, substitution: Dict[str, str]) -> Fact:
+        def resolve(value: str) -> str:
+            seen = set()
+            while value in substitution and value not in seen:
+                seen.add(value)
+                value = substitution[value]
+            return value
+
+        return Fact(fact.name, [resolve(arg) for arg in fact.args])
+
+    def unify(self, pattern: Fact, fact: Fact) -> Optional[Dict[str, str]]:
+        if pattern.name != fact.name or len(pattern.args) != len(fact.args):
+            return None
+
+        substitution: Dict[str, str] = {}
+        for pattern_arg, fact_arg in zip(pattern.args, fact.args):
+            if self.is_variable(pattern_arg):
+                existing = substitution.get(pattern_arg)
+                if existing is not None and existing != fact_arg:
+                    return None
+                substitution[pattern_arg] = fact_arg
+            elif pattern_arg != fact_arg:
+                return None
+        return substitution
+
+    def _extend_substitutions(
+        self, premise: Fact, substitutions: List[Dict[str, str]]
+    ) -> List[Dict[str, str]]:
+        extended = []
+        for substitution in substitutions:
+            grounded_premise = self.substitute(premise, substitution)
+            for fact in self.facts:
+                match = self.unify(grounded_premise, fact)
+                if match is not None:
+                    combined = substitution.copy()
+                    combined.update(match)
+                    extended.append(combined)
+        return extended
+
+    def apply_rule_forward(self, rule: Rule) -> List[Fact]:
+        substitutions = [{}]
+        for premise in rule.premises:
+            substitutions = self._extend_substitutions(premise, substitutions)
+            if not substitutions:
+                return []
+
+        conclusions = []
+        for substitution in substitutions:
+            conclusion = self.substitute(rule.conclusion, substitution)
+            if conclusion not in self.facts and conclusion not in conclusions:
+                conclusions.append(conclusion)
+        return conclusions
+
+    def forward_chaining(self, max_iterations: int = 100) -> Set[Fact]:
+        derived: Set[Fact] = set()
+        for _ in range(max_iterations):
+            new_facts = []
+            for rule in self.rules:
+                for conclusion in self.apply_rule_forward(rule):
+                    if conclusion not in self.facts and conclusion not in new_facts:
+                        new_facts.append(conclusion)
+            if not new_facts:
+                break
+            for fact in new_facts:
+                self.facts.add(fact)
+                derived.add(fact)
+                self.inference_count += 1
+        return derived
+
+    def _rename_rule(self, rule: Rule) -> Rule:
+        prefix = f"?rule{self._rule_counter}_"
+        self._rule_counter += 1
+        variables = {
+            arg
+            for fact in rule.premises + [rule.conclusion]
+            for arg in fact.args
+            if self.is_variable(arg)
+        }
+        substitution = {variable: prefix + variable for variable in variables}
+        premises = [self.substitute(fact, substitution) for fact in rule.premises]
+        conclusion = self.substitute(rule.conclusion, substitution)
+        return Rule(premises, conclusion, rule.name)
+
+    def _goal_signature(self, goal: Fact) -> Fact:
+        variable_names = {}
+        args = []
+        for arg in goal.args:
+            if self.is_variable(arg):
+                if arg not in variable_names:
+                    variable_names[arg] = f"?{len(variable_names)}"
+                args.append(variable_names[arg])
+            else:
+                args.append(arg)
+        return Fact(goal.name, args)
+
+    def _prove(
+        self,
+        goal: Fact,
+        substitution: Dict[str, str],
+        visited: Set[Fact],
+    ) -> List[Dict[str, str]]:
+        goal = self.substitute(goal, substitution)
+        solutions = []
+
+        for fact in self.facts:
+            match = self.unify(goal, fact)
+            if match is not None:
+                combined = substitution.copy()
+                combined.update(match)
+                solutions.append(combined)
+
+        signature = self._goal_signature(goal)
+        if signature in visited:
+            return solutions
+        next_visited = visited | {signature}
+
+        for rule in self.rules:
+            renamed_rule = self._rename_rule(rule)
+            match = self.unify(renamed_rule.conclusion, goal)
+            if match is None:
+                continue
+
+            current = substitution.copy()
+            current.update(match)
+            substitutions = [current]
+            for premise in renamed_rule.premises:
+                next_substitutions = []
+                for current_substitution in substitutions:
+                    next_substitutions.extend(
+                        self._prove(
+                            premise,
+                            current_substitution,
+                            next_visited,
+                        )
+                    )
+                substitutions = next_substitutions
+                if not substitutions:
+                    break
+
+            if substitutions:
+                self.inference_count += 1
+                solutions.extend(substitutions)
+        return solutions
+
+    def backward_chaining(self, goal: Fact) -> bool:
+        return bool(self._prove(goal, {}, set()))
+
+    def query(self, goal: Fact) -> bool:
+        return self.backward_chaining(goal)
+
+
+class MedicalDiagnosisKB(KnowledgeBase):
+    def __init__(self):
+        super().__init__()
+        self._build_knowledge_base()
+
+    def _build_knowledge_base(self):
+        self.add_facts(
+            [
+                Fact("symptom", ["cough"]),
+                Fact("symptom", ["fever"]),
+                Fact("symptom", ["fatigue"]),
+                Fact("symptom", ["chest_pain"]),
+                Fact("risk_factor", ["smoking"]),
+                Fact("risk_factor", ["age_over_65"]),
+                Fact("test_result", ["blood_pressure_high"]),
+            ]
+        )
+        self.add_rules(
+            [
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("symptom", ["fever"]),
+                        Fact("symptom", ["fatigue"]),
+                    ],
+                    Fact("disease", ["flu"]),
+                    "Flu_Diagnosis",
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("symptom", ["chest_pain"]),
+                        Fact("risk_factor", ["smoking"]),
+                    ],
+                    Fact("disease", ["lung_cancer"]),
+                    "Lung_Cancer_Diagnosis",
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["chest_pain"]),
+                        Fact("risk_factor", ["age_over_65"]),
+                        Fact("test_result", ["blood_pressure_high"]),
+                    ],
+                    Fact("disease", ["heart_disease"]),
+                    "Heart_Disease_Diagnosis",
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["fever"]),
+                        Fact("symptom", ["fatigue"]),
+                    ],
+                    Fact("disease", ["infection"]),
+                    "Infection_Diagnosis",
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("risk_factor", ["smoking"]),
+                    ],
+                    Fact("disease", ["bronchitis"]),
+                    "Bronchitis_Diagnosis",
+                ),
+                Rule(
+                    [Fact("disease", ["flu"])],
+                    Fact("treatment", ["rest_and_fluids"]),
+                    "Flu_Treatment",
+                ),
+                Rule(
+                    [Fact("disease", ["flu"])],
+                    Fact("treatment", ["antiviral_medication"]),
+                    "Flu_Treatment_2",
+                ),
+                Rule(
+                    [Fact("disease", ["bronchitis"])],
+                    Fact("treatment", ["antibiotics"]),
+                    "Bronchitis_Treatment",
+                ),
+                Rule(
+                    [Fact("disease", ["bronchitis"])],
+                    Fact("treatment", ["cough_medicine"]),
+                    "Bronchitis_Treatment_2",
+                ),
+                Rule(
+                    [Fact("disease", ["infection"])],
+                    Fact("treatment", ["antibiotics"]),
+                    "Infection_Treatment",
+                ),
+                Rule(
+                    [Fact("disease", ["heart_disease"])],
+                    Fact("treatment", ["blood_pressure_medication"]),
+                    "Heart_Treatment",
+                ),
+                Rule(
+                    [Fact("disease", ["heart_disease"])],
+                    Fact("treatment", ["lifestyle_changes"]),
+                    "Heart_Treatment_2",
+                ),
+                Rule(
+                    [Fact("disease", ["lung_cancer"])],
+                    Fact("treatment", ["oncology_consultation"]),
+                    "Cancer_Treatment",
+                ),
+                Rule(
+                    [Fact("disease", ["lung_cancer"])],
+                    Fact("treatment", ["chemo_therapy"]),
+                    "Cancer_Treatment_2",
+                ),
+                Rule(
+                    [Fact("disease", ["flu"])],
+                    Fact("severity", ["moderate"]),
+                    "Flu_Severity",
+                ),
+                Rule(
+                    [Fact("disease", ["bronchitis"])],
+                    Fact("severity", ["moderate"]),
+                    "Bronchitis_Severity",
+                ),
+                Rule(
+                    [Fact("disease", ["infection"])],
+                    Fact("severity", ["moderate"]),
+                    "Infection_Severity",
+                ),
+                Rule(
+                    [
+                        Fact("disease", ["heart_disease"]),
+                        Fact("risk_factor", ["age_over_65"]),
+                    ],
+                    Fact("severity", ["high"]),
+                    "Heart_Severity_High",
+                ),
+                Rule(
+                    [
+                        Fact("disease", ["lung_cancer"]),
+                        Fact("risk_factor", ["smoking"]),
+                    ],
+                    Fact("severity", ["high"]),
+                    "Cancer_Severity_High",
+                ),
+                Rule(
+                    [Fact("severity", ["high"])],
+                    Fact("urgent_care", ["yes"]),
+                    "High_Urgency",
+                ),
+                Rule(
+                    [Fact("severity", ["moderate"])],
+                    Fact("urgent_care", ["no"]),
+                    "Moderate_Urgency",
+                ),
+                Rule(
+                    [Fact("urgent_care", ["yes"])],
+                    Fact("recommendation", ["visit_emergency_room"]),
+                    "ER_Recommendation",
+                ),
+                Rule(
+                    [Fact("urgent_care", ["no"])],
+                    Fact("recommendation", ["schedule_doctor_appointment"]),
+                    "Doctor_Recommendation",
+                ),
+            ]
+        )
+
+
+class InferenceEngine:
+    def __init__(self, kb: KnowledgeBase):
+        self.kb = kb
+        self.forward_results: Optional[Set[Fact]] = None
+        self.backward_results: Dict[str, bool] = {}
+
+    def run_forward_chaining(self, verbose: bool = True) -> Set[Fact]:
+        print("\n" + "=" * 70)
+        print(" FORWARD CHAINING")
+        print("=" * 70)
+        print(f"\nInitial Facts: {len(self.kb.facts)}")
+        print(f"Rules: {len(self.kb.rules)}")
+        print("\nDeriving new facts...")
+        derived = self.kb.forward_chaining()
+        print("\nForward Chaining Complete")
+        print(f" Total Facts: {len(self.kb.facts)}")
+        print(f" New Facts Derived: {len(derived)}")
+        print(f" Inferences Made: {self.kb.inference_count}")
+        if derived and verbose:
+            print("\nDerived Facts:")
+            for fact in sorted(derived, key=str):
+                print(f" - {fact}")
+        self.forward_results = derived
+        return derived
+
+    def run_backward_chaining(self, goal: Fact, verbose: bool = True) -> bool:
+        print("\n" + "=" * 70)
+        print(" BACKWARD CHAINING")
+        print("=" * 70)
+        self.kb.inference_count = 0
+        print(f"\nGoal: {goal}")
+        if verbose:
+            print("\nTracing proof...")
+        result = self.kb.query(goal)
+        print(f"\nGoal {'Proven' if result else 'Not Proven'}")
+        print(f" Inferences Made: {self.kb.inference_count}")
+        self.backward_results[str(goal)] = result
+        return result
+
+    def compare_inference_methods(self, goals: List[Fact]):
+        print("\n" + "=" * 70)
+        print(" COMPARISON: FORWARD VS BACKWARD CHAINING")
+        print("=" * 70)
+        print("\n| Goal | Forward Chaining | Backward Chaining |")
+        print("|------|------------------|-------------------|")
+        if self.forward_results is None:
+            self.run_forward_chaining(verbose=False)
+        for goal in goals:
+            forward_result = goal in self.kb.facts
+            backward_result = self.kb.backward_chaining(goal)
+            print(
+                f"| {str(goal):<30} | {str(forward_result):<16} "
+                f"| {str(backward_result):<17} |"
+            )
+        print("\nObservations:")
+        print("- Forward Chaining: best for deriving all possible conclusions")
+        print("  Use when you want to know everything that follows from facts")
+        print("  Useful for monitoring systems and data-driven reasoning")
+        print("- Backward Chaining: best for goal-directed reasoning")
+        print("  Use when you have a specific question to answer")
+        print("  Useful for diagnosis and theorem proving")
+
+
+def demonstrate_medical_kb():
+    print("\n" + "=" * 70)
+    print(" MEDICAL DIAGNOSIS KNOWLEDGE BASE")
+    print("=" * 70)
+    print("Educational example only; not for clinical use.")
+    kb = MedicalDiagnosisKB()
+    engine = InferenceEngine(kb)
+    print("\nPatient Information:")
+    for fact in sorted(kb.facts, key=str):
+        print(f" - {fact}")
+    print("\nKnowledge Base Summary:")
+    print(f" Facts: {len(kb.facts)}")
+    print(f" Rules: {len(kb.rules)}")
+    engine.run_forward_chaining()
+
+    goals = [
+        Fact("disease", ["flu"]),
+        Fact("disease", ["bronchitis"]),
+        Fact("disease", ["lung_cancer"]),
+        Fact("disease", ["heart_disease"]),
+        Fact("treatment", ["antibiotics"]),
+        Fact("treatment", ["rest_and_fluids"]),
+        Fact("severity", ["high"]),
+        Fact("urgent_care", ["yes"]),
+        Fact("recommendation", ["visit_emergency_room"]),
+    ]
+    print("\n" + "=" * 70)
+    print(" DIAGNOSTIC QUERIES (Backward Chaining)")
+    print("=" * 70)
+    for goal in goals:
+        engine.run_backward_chaining(goal)
+    engine.compare_inference_methods(goals)
+
+    print("\n" + "=" * 70)
+    print(" RULE-BASE OUTPUTS (EDUCATIONAL EXAMPLE)")
+    print("=" * 70)
+    diseases = [
+        Fact("disease", ["flu"]),
+        Fact("disease", ["bronchitis"]),
+        Fact("disease", ["infection"]),
+        Fact("disease", ["lung_cancer"]),
+        Fact("disease", ["heart_disease"]),
+    ]
+    print("\nPossible Diagnoses:")
+    for disease in diseases:
+        status = "Derived" if disease in kb.facts else "Not derived"
+        print(f" - {disease}: {status}")
+    treatments = [
+        Fact("treatment", ["antibiotics"]),
+        Fact("treatment", ["rest_and_fluids"]),
+        Fact("treatment", ["antiviral_medication"]),
+        Fact("treatment", ["cough_medicine"]),
+    ]
+    print("\nIllustrative Rule Outputs (not medical advice):")
+    for treatment in treatments:
+        status = "Derived" if treatment in kb.facts else "Not derived"
+        print(f" - {treatment}: {status}")
+
+
+def main():
+    print("\n" + "=" * 80)
+    print(" EXPERIMENT 5B: MEDICAL DIAGNOSIS KNOWLEDGE BASE")
+    print("=" * 80)
+    print("\nTHEORETICAL BACKGROUND:")
+    print("-" * 40)
+    print("\nPropositional Logic:")
+    print(" - Propositions: statements that are true or false")
+    print(" - Connectives: NOT, AND, OR, implies, and iff")
+    print(" - Example: (Rain AND Cold) implies WearCoat")
+    print("\nFirst-Order Logic (FOL):")
+    print(" - Constants: John, Paris, 5")
+    print(" - Variables: x, y, z")
+    print(" - Predicates: Human(x), Likes(x, y)")
+    print(" - Quantifiers: for all, there exists")
+    print(" - Example: for all x, Human(x) implies Mortal(x)")
+    print("\nInference Methods:")
+    print(" - Forward Chaining: data-driven, starts with facts")
+    print(" - Backward Chaining: goal-driven, starts with a goal")
+    demonstrate_medical_kb()
+    print("\n" + "=" * 80)
+    print(" SUMMARY")
+    print("=" * 80)
+    print("\nKey Takeaways:")
+    print("1. Logic provides formal knowledge representation")
+    print("2. Forward Chaining derives conclusions from facts")
+    print("3. Backward Chaining proves specific goals using rules")
+    print("4. Knowledge bases combine facts and rules for reasoning")
+    print("5. Both inference methods have specific use cases")
+    print("\nWhen to Use:")
+    print(" - Forward Chaining: data-driven applications, monitoring systems")
+    print(" - Backward Chaining: diagnostic systems, question answering")
+    print("\nAdvantages:")
+    print(" - Formal and precise knowledge representation")
+    print(" - Sound inference mechanisms")
+    print(" - Explainable conclusions")
+    print(" - Modular knowledge base")
+    print("\nLimitations:")
+    print(" - Expressive limitations compared to full FOL")
+    print(" - Can be computationally expensive")
+    print(" - Requires knowledge-engineering expertise")
+    print(" - Handling uncertainty is difficult")
+    print("\n" + "=" * 80)
+    print("EXPERIMENT COMPLETE")
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+14. Rule-Based Expert System
+from typing import Dict, List, Optional, Set, Tuple
+
+
+class Fact:
+    def __init__(
+        self, name: str, args: Optional[List[str]] = None, certainty: float = 1.0
+    ):
+        self.name = name
+        self.args = tuple(args or [])
+        self.certainty = certainty
+
+    def __str__(self):
+        if self.args:
+            return f"{self.name}({', '.join(self.args)})"
+        return self.name
+
+    def __eq__(self, other):
+        return isinstance(other, Fact) and self.name == other.name and self.args == other.args
+
+    def __hash__(self):
+        return hash((self.name, self.args))
+
+    def __repr__(self):
+        return str(self)
+
+    def matches(self, pattern: "Fact") -> Optional[Dict[str, str]]:
+        if self.name != pattern.name or len(self.args) != len(pattern.args):
+            return None
+
+        bindings: Dict[str, str] = {}
+        for value, pattern_value in zip(self.args, pattern.args):
+            if pattern_value.isupper() or pattern_value.startswith("?"):
+                previous = bindings.get(pattern_value)
+                if previous is not None and previous != value:
+                    return None
+                bindings[pattern_value] = value
+            elif value != pattern_value:
+                return None
+        return bindings
+
+
+class Rule:
+    def __init__(
+        self,
+        premises: List[Fact],
+        conclusion: Fact,
+        name: str = "",
+        priority: int = 0,
+        certainty: float = 1.0,
+    ):
+        self.premises = premises
+        self.conclusion = conclusion
+        self.name = name or f"Rule_{id(self)}"
+        self.priority = priority
+        self.certainty = certainty
+
+    def __str__(self):
+        premises = " AND ".join(str(premise) for premise in self.premises)
+        return f"IF {premises} THEN {self.conclusion}"
+
+    def __repr__(self):
+        return str(self)
+
+    def apply(self, facts: Set[Fact]) -> List[Tuple[Fact, Dict[str, str]]]:
+        bindings_list: List[Dict[str, str]] = [{}]
+        for premise in self.premises:
+            next_bindings = []
+            for bindings in bindings_list:
+                grounded = Fact(
+                    premise.name,
+                    [bindings.get(arg, arg) for arg in premise.args],
+                )
+                for fact in facts:
+                    match = fact.matches(grounded)
+                    if match is None:
+                        continue
+                    combined = bindings.copy()
+                    combined.update(match)
+                    next_bindings.append(combined)
+            bindings_list = next_bindings
+            if not bindings_list:
+                return []
+
+        results = []
+        for bindings in bindings_list:
+            conclusion = self._apply_bindings(self.conclusion, bindings)
+            results.append((conclusion, bindings))
+        return results
+
+    def _apply_bindings(
+        self, fact: Fact, bindings: Dict[str, str]
+    ) -> Fact:
+        args = [bindings.get(arg, arg) for arg in fact.args]
+        return Fact(fact.name, args, self.certainty)
+
+
+class ExpertSystem:
+    exclusive_predicates = {"severity", "urgent_care", "recommendation"}
+
+    def __init__(self, name: str = "Expert System"):
+        self.name = name
+        self.facts: Set[Fact] = set()
+        self.rules: List[Rule] = []
+        self.working_memory: Set[Fact] = set()
+        self.inference_count = 0
+        self.inference_trace: List[str] = []
+        self.derived_by: Dict[Fact, Rule] = {}
+
+    def add_fact(self, fact: Fact):
+        self.facts.add(fact)
+        self.working_memory.add(fact)
+
+    def add_facts(self, facts: List[Fact]):
+        for fact in facts:
+            self.add_fact(fact)
+
+    def add_rule(self, rule: Rule):
+        self.rules.append(rule)
+
+    def add_rules(self, rules: List[Rule]):
+        for rule in rules:
+            self.add_rule(rule)
+
+    def clear_working_memory(self):
+        self.working_memory = set(self.facts)
+        self.inference_count = 0
+        self.inference_trace = []
+        self.derived_by = {}
+
+    def _select_matches(self, matches, conflict_resolution: str):
+        if conflict_resolution != "priority":
+            return matches
+
+        selected = []
+        best_by_predicate = {}
+        for rule, conclusion, bindings in matches:
+            if conclusion.name not in self.exclusive_predicates:
+                selected.append((rule, conclusion, bindings))
+                continue
+            current = best_by_predicate.get(conclusion.name)
+            if current is None or rule.priority > current[0].priority:
+                best_by_predicate[conclusion.name] = (rule, conclusion, bindings)
+        selected.extend(best_by_predicate.values())
+        return selected
+
+    def forward_chaining(
+        self,
+        max_iterations: int = 100,
+        conflict_resolution: str = "order",
+    ) -> Set[Fact]:
+        if conflict_resolution not in {"order", "priority", "specificity"}:
+            raise ValueError(
+                "conflict_resolution must be 'order', 'priority', or 'specificity'"
+            )
+        self.clear_working_memory()
+        if conflict_resolution == "priority":
+            rules = sorted(self.rules, key=lambda rule: rule.priority, reverse=True)
+        elif conflict_resolution == "specificity":
+            rules = sorted(
+                self.rules, key=lambda rule: len(rule.premises), reverse=True
+            )
+        else:
+            rules = self.rules
+
+        for _ in range(max_iterations):
+            matches = []
+            for rule in rules:
+                for conclusion, bindings in rule.apply(self.working_memory):
+                    matches.append((rule, conclusion, bindings))
+            matches = self._select_matches(matches, conflict_resolution)
+            new_facts = []
+            for rule, conclusion, bindings in matches:
+                if conclusion not in self.working_memory and conclusion not in new_facts:
+                    new_facts.append(conclusion)
+                    self.derived_by[conclusion] = rule
+                    self.inference_trace.append(
+                        f"Rule '{rule.name}' fired with bindings {bindings}: "
+                        f"{conclusion}"
+                    )
+            if not new_facts:
+                break
+            self.working_memory.update(new_facts)
+            self.inference_count += len(new_facts)
+        return self.working_memory
+
+    def backward_chaining(
+        self, goal: Fact, visited: Optional[Set[Fact]] = None
+    ) -> bool:
+        for fact in self.working_memory:
+            if fact.matches(goal) is not None:
+                return True
+
+        visited = set() if visited is None else visited
+        if goal in visited:
+            return False
+        next_visited = visited | {goal}
+        rules = sorted(self.rules, key=lambda rule: rule.priority, reverse=True)
+        for rule in rules:
+            bindings = goal.matches(rule.conclusion)
+            if bindings is None:
+                continue
+
+            premises_proven = True
+            for premise in rule.premises:
+                substituted = Fact(
+                    premise.name,
+                    [bindings.get(arg, arg) for arg in premise.args],
+                )
+                if not self.backward_chaining(substituted, next_visited.copy()):
+                    premises_proven = False
+                    break
+            if premises_proven:
+                self.inference_count += 1
+                self.inference_trace.append(
+                    f"Rule '{rule.name}' used to prove {goal}: {rule}"
+                )
+                return True
+        return False
+
+    def query(self, query: Fact) -> bool:
+        self.clear_working_memory()
+        return self.backward_chaining(query)
+
+    def get_all_facts(self) -> Set[Fact]:
+        return self.working_memory
+
+    def get_facts_by_predicate(self, predicate: str) -> Set[Fact]:
+        return {fact for fact in self.working_memory if fact.name == predicate}
+
+    def get_derived_facts(self) -> Set[Fact]:
+        return self.working_memory - self.facts
+
+    def print_knowledge_base(self):
+        print("\n" + "=" * 70)
+        print(f" KNOWLEDGE BASE: {self.name}")
+        print("=" * 70)
+        print("\nFACTS:")
+        for fact in sorted(self.facts, key=str):
+            print(f" - {fact}")
+        print(f"\nRULES ({len(self.rules)}):")
+        for index, rule in enumerate(self.rules, 1):
+            print(f" {index}. {rule}")
+            if rule.priority:
+                print(f"    Priority: {rule.priority}")
+
+    def print_working_memory(self):
+        print("\n" + "=" * 70)
+        print(" WORKING MEMORY")
+        print("=" * 70)
+        derived = self.get_derived_facts()
+        print(f"\nInitial Facts: {len(self.facts)}")
+        for fact in sorted(self.facts, key=str):
+            print(f" - {fact}")
+        print(f"\nDerived Facts: {len(derived)}")
+        for fact in sorted(derived, key=str):
+            print(f" - {fact}")
+        print(f"\nTotal Facts: {len(self.working_memory)}")
+        print(f"Inferences Made: {self.inference_count}")
+
+    def print_trace(self):
+        print("\n" + "=" * 70)
+        print(" INFERENCE TRACE")
+        print("=" * 70)
+        if not self.inference_trace:
+            print("\nNo inference trace available.")
+            return
+        for index, trace in enumerate(self.inference_trace, 1):
+            print(f"{index:2d}. {trace}")
+
+    def explain(self, fact: Fact) -> str:
+        if fact in self.facts:
+            return f"'{fact}' is an initial fact (provided as input)."
+        if fact not in self.working_memory:
+            return f"'{fact}' is not in working memory."
+        rule = self.derived_by.get(fact)
+        if rule is not None:
+            premises = " AND ".join(str(premise) for premise in rule.premises)
+            return f"'{fact}' was derived using rule: IF {premises} THEN {fact}"
+        return f"'{fact}' is in working memory but its source could not be identified."
+
+
+class MedicalDiagnosisExpert(ExpertSystem):
+    question_map = {
+        "Do you have a cough?": ("symptom", "cough"),
+        "Do you have a fever?": ("symptom", "fever"),
+        "Do you feel fatigued?": ("symptom", "fatigue"),
+        "Do you have chest pain?": ("symptom", "chest_pain"),
+        "Do you have shortness of breath?": ("symptom", "shortness_of_breath"),
+        "Do you have a headache?": ("symptom", "headache"),
+        "Do you have a sore throat?": ("symptom", "sore_throat"),
+        "Do you have a runny nose?": ("symptom", "runny_nose"),
+        "Do you smoke?": ("risk_factor", "smoking"),
+        "Are you over 65 years old?": ("risk_factor", "age_over_65"),
+    }
+
+    def __init__(self):
+        super().__init__("Medical Diagnosis Expert System")
+        self._build_knowledge_base()
+
+    def _build_knowledge_base(self):
+        self.setup_default_rules()
+
+    def get_initial_questions(self) -> List[str]:
+        return [f"{question} (yes/no)" for question in self.question_map]
+
+    def process_answer(self, question: str, answer: str) -> Optional[Fact]:
+        question = question.split(" (")[0]
+        mapped = self.question_map.get(question)
+        if mapped is not None and answer.strip().lower() in {"yes", "y"}:
+            predicate, value = mapped
+            return Fact(predicate, [value])
+        return None
+
+    def initialize_from_user_input(self, answers: List[Tuple[str, str]]):
+        for question, answer in answers:
+            fact = self.process_answer(question, answer)
+            if fact is not None:
+                self.add_fact(fact)
+
+    def setup_default_rules(self):
+        self.add_rules(
+            [
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("symptom", ["fever"]),
+                        Fact("symptom", ["fatigue"]),
+                    ],
+                    Fact("disease", ["flu"]),
+                    name="Flu_Diagnosis",
+                    priority=3,
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("symptom", ["fever"]),
+                        Fact("symptom", ["sore_throat"]),
+                        Fact("symptom", ["runny_nose"]),
+                    ],
+                    Fact("disease", ["common_cold"]),
+                    name="Cold_Diagnosis",
+                    priority=2,
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("symptom", ["shortness_of_breath"]),
+                        Fact("symptom", ["chest_pain"]),
+                    ],
+                    Fact("disease", ["pneumonia"]),
+                    name="Pneumonia_Diagnosis",
+                    priority=4,
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("symptom", ["shortness_of_breath"]),
+                        Fact("symptom", ["fatigue"]),
+                        Fact("risk_factor", ["smoking"]),
+                    ],
+                    Fact("disease", ["bronchitis"]),
+                    name="Bronchitis_Diagnosis",
+                    priority=3,
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["cough"]),
+                        Fact("symptom", ["chest_pain"]),
+                        Fact("symptom", ["shortness_of_breath"]),
+                        Fact("risk_factor", ["smoking"]),
+                    ],
+                    Fact("disease", ["lung_cancer"]),
+                    name="Lung_Cancer_Diagnosis",
+                    priority=5,
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["fever"]),
+                        Fact("symptom", ["headache"]),
+                        Fact("symptom", ["fatigue"]),
+                    ],
+                    Fact("disease", ["infection"]),
+                    name="Infection_Diagnosis",
+                    priority=2,
+                ),
+                Rule(
+                    [
+                        Fact("symptom", ["chest_pain"]),
+                        Fact("symptom", ["shortness_of_breath"]),
+                        Fact("symptom", ["fatigue"]),
+                        Fact("risk_factor", ["age_over_65"]),
+                    ],
+                    Fact("disease", ["heart_disease"]),
+                    name="Heart_Disease_Diagnosis",
+                    priority=5,
+                ),
+                Rule(
+                    [Fact("disease", ["flu"])],
+                    Fact("treatment", ["rest_and_fluids"]),
+                    name="Flu_Treatment_1",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["flu"])],
+                    Fact("treatment", ["antiviral_medication"]),
+                    name="Flu_Treatment_2",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["common_cold"])],
+                    Fact("treatment", ["rest_and_fluids"]),
+                    name="Cold_Treatment_1",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["common_cold"])],
+                    Fact("treatment", ["decongestants"]),
+                    name="Cold_Treatment_2",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["pneumonia"])],
+                    Fact("treatment", ["antibiotics"]),
+                    name="Pneumonia_Treatment_1",
+                    priority=2,
+                ),
+                Rule(
+                    [Fact("disease", ["pneumonia"])],
+                    Fact("treatment", ["hospitalization"]),
+                    name="Pneumonia_Treatment_2",
+                    priority=2,
+                ),
+                Rule(
+                    [Fact("disease", ["bronchitis"])],
+                    Fact("treatment", ["antibiotics"]),
+                    name="Bronchitis_Treatment_1",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["bronchitis"])],
+                    Fact("treatment", ["cough_medicine"]),
+                    name="Bronchitis_Treatment_2",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["infection"])],
+                    Fact("treatment", ["antibiotics"]),
+                    name="Infection_Treatment",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["heart_disease"])],
+                    Fact("treatment", ["blood_pressure_medication"]),
+                    name="Heart_Treatment_1",
+                    priority=2,
+                ),
+                Rule(
+                    [Fact("disease", ["heart_disease"])],
+                    Fact("treatment", ["lifestyle_changes"]),
+                    name="Heart_Treatment_2",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["lung_cancer"])],
+                    Fact("treatment", ["oncology_consultation"]),
+                    name="Cancer_Treatment_1",
+                    priority=3,
+                ),
+                Rule(
+                    [Fact("disease", ["lung_cancer"])],
+                    Fact("treatment", ["chemo_therapy"]),
+                    name="Cancer_Treatment_2",
+                    priority=3,
+                ),
+                Rule(
+                    [Fact("disease", ["flu"])],
+                    Fact("severity", ["moderate"]),
+                    name="Flu_Severity",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["common_cold"])],
+                    Fact("severity", ["mild"]),
+                    name="Cold_Severity",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["pneumonia"])],
+                    Fact("severity", ["high"]),
+                    name="Pneumonia_Severity",
+                    priority=2,
+                ),
+                Rule(
+                    [Fact("disease", ["bronchitis"])],
+                    Fact("severity", ["moderate"]),
+                    name="Bronchitis_Severity",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("disease", ["infection"])],
+                    Fact("severity", ["moderate"]),
+                    name="Infection_Severity",
+                    priority=1,
+                ),
+                Rule(
+                    [
+                        Fact("disease", ["heart_disease"]),
+                        Fact("risk_factor", ["age_over_65"]),
+                    ],
+                    Fact("severity", ["high"]),
+                    name="Heart_Severity_High",
+                    priority=2,
+                ),
+                Rule(
+                    [
+                        Fact("disease", ["lung_cancer"]),
+                        Fact("risk_factor", ["smoking"]),
+                    ],
+                    Fact("severity", ["critical"]),
+                    name="Cancer_Severity_Critical",
+                    priority=3,
+                ),
+                Rule(
+                    [Fact("severity", ["critical"])],
+                    Fact("urgent_care", ["yes"]),
+                    name="Critical_Urgency",
+                    priority=2,
+                ),
+                Rule(
+                    [Fact("severity", ["high"])],
+                    Fact("urgent_care", ["yes"]),
+                    name="High_Urgency",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("severity", ["moderate"])],
+                    Fact("urgent_care", ["no"]),
+                    name="Moderate_Urgency",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("severity", ["mild"])],
+                    Fact("urgent_care", ["no"]),
+                    name="Mild_Urgency",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("urgent_care", ["yes"])],
+                    Fact("recommendation", ["visit_emergency_room_immediately"]),
+                    name="Emergency_Recommendation",
+                    priority=2,
+                ),
+                Rule(
+                    [
+                        Fact("urgent_care", ["no"]),
+                        Fact("severity", ["critical"]),
+                    ],
+                    Fact("recommendation", ["visit_emergency_room_immediately"]),
+                    name="Emergency_Recommendation_2",
+                    priority=2,
+                ),
+                Rule(
+                    [Fact("urgent_care", ["no"]), Fact("severity", ["high"])],
+                    Fact("recommendation", ["schedule_doctor_appointment_today"]),
+                    name="Doctor_Today",
+                    priority=1,
+                ),
+                Rule(
+                    [
+                        Fact("urgent_care", ["no"]),
+                        Fact("severity", ["moderate"]),
+                    ],
+                    Fact("recommendation", ["schedule_doctor_appointment_soon"]),
+                    name="Doctor_Soon",
+                    priority=1,
+                ),
+                Rule(
+                    [Fact("urgent_care", ["no"]), Fact("severity", ["mild"])],
+                    Fact("recommendation", ["home_care_and_monitor"]),
+                    name="Home_Care",
+                    priority=1,
+                ),
+            ]
+        )
+
+    def run_consultation(self):
+        print("\n" + "=" * 70)
+        print(f" {self.name}")
+        print("=" * 70)
+        print("\nEducational demonstration only; not a medical diagnosis or advice.")
+        print("\nPlease answer the following questions about your symptoms.")
+        answers = []
+        for question in self.get_initial_questions():
+            while True:
+                response = input(f"{question} ").strip().lower()
+                if response in {"yes", "y", "no", "n"}:
+                    answers.append((question, response))
+                    break
+                print("Please answer yes or no.")
+        self.initialize_from_user_input(answers)
+        print("\nAnalyzing answers...")
+        self.forward_chaining(conflict_resolution="priority")
+        self.display_diagnosis_results()
+
+    def display_diagnosis_results(self):
+        print("\n" + "=" * 70)
+        print(" RULE-BASED RESULTS (EDUCATIONAL ONLY)")
+        print("=" * 70)
+        symptoms = self.get_facts_by_predicate("symptom")
+        print("\nReported Symptoms:")
+        for symptom in sorted(symptoms, key=str):
+            print(f" - {symptom.args[0].replace('_', ' ').title()}")
+        if not symptoms:
+            print(" - No symptoms reported")
+
+        diagnoses = self.get_facts_by_predicate("disease")
+        print("\nPossible Diagnoses:")
+        for diagnosis in sorted(diagnoses, key=str):
+            print(f" - {diagnosis.args[0].replace('_', ' ').title()}")
+        if not diagnoses:
+            print(" - No rule matched the provided answers")
+
+        treatments = self.get_facts_by_predicate("treatment")
+        print("\nIllustrative Rule Outputs (not medical advice):")
+        for treatment in sorted(treatments, key=str):
+            print(f" - {treatment.args[0].replace('_', ' ').title()}")
+        if not treatments:
+            print(" - No treatment rule was triggered")
+
+        severity = self.get_facts_by_predicate("severity")
+        print("\nRule-Based Severity:")
+        for item in sorted(severity, key=str):
+            print(f" - {item.args[0].upper()}")
+        if not severity:
+            print(" - Not determined")
+
+        recommendations = self.get_facts_by_predicate("recommendation")
+        print("\nRule-Based Recommendations:")
+        for recommendation in sorted(recommendations, key=str):
+            print(f" - {recommendation.args[0].replace('_', ' ').title()}")
+        if not recommendations:
+            print(" - Consider seeking advice from a qualified clinician")
+
+        print(f"\nRules fired: {self.inference_count}")
+        print(f"Derived facts: {len(self.get_derived_facts())}")
+
+
+class FinancialAdvisorExpert(ExpertSystem):
+    def __init__(self):
+        super().__init__("Financial Investment Advisor")
+        self._build_knowledge_base()
+
+    def _build_knowledge_base(self):
+        self.add_rules(
+            [
+                Rule(
+                    [
+                        Fact("age", ["young"]),
+                        Fact("income", ["high"]),
+                        Fact("dependents", ["few"]),
+                    ],
+                    Fact("risk_tolerance", ["high"]),
+                    name="Risk_High",
+                    priority=3,
+                ),
+                Rule(
+                    [
+                        Fact("age", ["middle"]),
+                        Fact("income", ["medium"]),
+                        Fact("dependents", ["some"]),
+                    ],
+                    Fact("risk_tolerance", ["moderate"]),
+                    name="Risk_Moderate",
+                    priority=2,
+                ),
+                Rule(
+                    [
+                        Fact("age", ["older"]),
+                        Fact("income", ["low"]),
+                        Fact("dependents", ["many"]),
+                    ],
+                    Fact("risk_tolerance", ["low"]),
+                    name="Risk_Low",
+                    priority=3,
+                ),
+                Rule(
+                    [
+                        Fact("risk_tolerance", ["high"]),
+                        Fact("investment_horizon", ["long"]),
+                    ],
+                    Fact("investment", ["aggressive_growth"]),
+                    name="Inv_Aggressive",
+                    priority=2,
+                ),
+                Rule(
+                    [
+                        Fact("risk_tolerance", ["moderate"]),
+                        Fact("investment_horizon", ["medium"]),
+                    ],
+                    Fact("investment", ["balanced_growth"]),
+                    name="Inv_Balanced",
+                    priority=2,
+                ),
+                Rule(
+                    [
+                        Fact("risk_tolerance", ["low"]),
+                        Fact("investment_horizon", ["short"]),
+                    ],
+                    Fact("investment", ["conservative"]),
+                    name="Inv_Conservative",
+                    priority=2,
+                ),
+                Rule(
+                    [Fact("investment", ["aggressive_growth"])],
+                    Fact("asset_allocation", ["stocks_80_bonds_20"]),
+                    name="Allocation_Aggressive",
+                ),
+                Rule(
+                    [Fact("investment", ["balanced_growth"])],
+                    Fact("asset_allocation", ["stocks_60_bonds_40"]),
+                    name="Allocation_Balanced",
+                ),
+                Rule(
+                    [Fact("investment", ["conservative"])],
+                    Fact("asset_allocation", ["stocks_30_bonds_70"]),
+                    name="Allocation_Conservative",
+                ),
+            ]
+        )
+
+    @staticmethod
+    def _ask_choice(prompt: str, choices: Set[str]) -> str:
+        choices_text = "/".join(sorted(choices))
+        while True:
+            answer = input(f"{prompt} ({choices_text}): ").strip().lower()
+            if answer in choices:
+                return answer
+            print(f"Choose one of: {choices_text}.")
+
+    def run_consultation(self):
+        print("\n" + "=" * 70)
+        print(f" {self.name}")
+        print("=" * 70)
+        print("Educational example only; not financial advice.")
+        age = self._ask_choice("Age group", {"young", "middle", "older"})
+        income = self._ask_choice("Income level", {"low", "medium", "high"})
+        dependents = self._ask_choice("Dependents", {"few", "some", "many"})
+        horizon = self._ask_choice(
+            "Investment horizon", {"short", "medium", "long"}
+        )
+        self.add_facts(
+            [
+                Fact("age", [age]),
+                Fact("income", [income]),
+                Fact("dependents", [dependents]),
+                Fact("investment_horizon", [horizon]),
+            ]
+        )
+        self.forward_chaining(conflict_resolution="priority")
+        self.display_investment_results()
+
+    def display_investment_results(self):
+        print("\n" + "=" * 70)
+        print(" RULE-BASED INVESTMENT EXAMPLE (NOT FINANCIAL ADVICE)")
+        print("=" * 70)
+        risk = self.get_facts_by_predicate("risk_tolerance")
+        print("\nIllustrative Risk Tolerance:")
+        for item in sorted(risk, key=str):
+            print(f" - {item.args[0].upper()}")
+        if not risk:
+            print(" - No rule matched this profile")
+
+        investments = self.get_facts_by_predicate("investment")
+        print("\nIllustrative Strategy:")
+        for item in sorted(investments, key=str):
+            print(f" - {item.args[0].replace('_', ' ').title()}")
+        if not investments:
+            print(" - No strategy was derived")
+
+        allocations = self.get_facts_by_predicate("asset_allocation")
+        print("\nIllustrative Asset Allocation:")
+        for allocation in sorted(allocations, key=str):
+            parts = allocation.args[0].split("_")
+            print(f" - Stocks: {parts[1]}%, Bonds: {parts[3]}%")
+        if not allocations:
+            print(" - No allocation was derived")
+
+
+class RuleBasedExpertSystemUI:
+    def __init__(self):
+        self.systems = {
+            "medical": MedicalDiagnosisExpert(),
+            "financial": FinancialAdvisorExpert(),
+        }
+
+    def show_menu(self) -> str:
+        print("\n" + "=" * 70)
+        print(" RULE-BASED EXPERT SYSTEM")
+        print("=" * 70)
+        print("1. Medical Diagnosis Expert System")
+        print("2. Financial Investment Advisor")
+        print("3. Exit")
+        return input("\nSelect an option (1-3): ").strip()
+
+    def run(self):
+        while True:
+            choice = self.show_menu()
+            if choice == "1":
+                self.systems["medical"].run_consultation()
+            elif choice == "2":
+                self.systems["financial"].run_consultation()
+            elif choice == "3":
+                print("\nThank you for using the Expert System.")
+                break
+            else:
+                print("\nInvalid choice. Please try again.")
+
+
+def main():
+    print("\n" + "=" * 80)
+    print(" EXPERIMENT 6: RULE-BASED EXPERT SYSTEM")
+    print("=" * 80)
+    print("\nExpert System Components:")
+    print(" - Knowledge Base: stores facts and rules")
+    print(" - Inference Engine: applies rules to derive conclusions")
+    print(" - Working Memory: stores current facts and derived facts")
+    print(" - Explanation Facility: explains derived conclusions")
+    print(" - User Interface: interacts with the user")
+    print("\nConflict Resolution Strategies:")
+    print(" - Order: uses the knowledge-base rule order")
+    print(" - Priority: prefers higher-priority rules")
+    print(" - Specificity: tries rules with more premises first")
+    print("\nMedical and financial examples are educational only.")
+
+    demo = input("\nRun a medical demo first? (yes/no): ").strip().lower()
+    if demo in {"yes", "y"}:
+        medical = MedicalDiagnosisExpert()
+        sample_facts = [
+            Fact("symptom", ["cough"]),
+            Fact("symptom", ["fever"]),
+            Fact("symptom", ["fatigue"]),
+            Fact("symptom", ["chest_pain"]),
+            Fact("symptom", ["shortness_of_breath"]),
+            Fact("risk_factor", ["smoking"]),
+            Fact("risk_factor", ["age_over_65"]),
+        ]
+        medical.add_facts(sample_facts)
+        medical.forward_chaining(conflict_resolution="priority")
+        medical.display_diagnosis_results()
+        medical.print_trace()
+        print("\nExplanation examples:")
+        for fact in sorted(medical.get_facts_by_predicate("disease"), key=str):
+            print(f" - {medical.explain(fact)}")
+
+    RuleBasedExpertSystemUI().run()
+    print("\nEXPERIMENT COMPLETE")
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+15. Natural Language Processing with Hugging Face
+import importlib
+import importlib.util
+import time
+from typing import Any, Dict, List
+
+
+MODEL_IDS = {
+    "sentiment": "distilbert-base-uncased-finetuned-sst-2-english",
+    "generation": "gpt2",
+    "qa": "distilbert-base-cased-distilled-squad",
+    "zero_shot": "facebook/bart-large-mnli",
+    "summarization": "facebook/bart-large-cnn",
+    "ner": "dslim/bert-base-NER",
+}
+
+
+class HuggingFaceNLPApplication:
+    def __init__(self):
+        self.pipeline_factory = None
+        self.pipelines: Dict[str, Any] = {}
+        self.results_history: List[Dict[str, Any]] = []
+        self.model_loading_time: Dict[str, float] = {}
+        self._initialize_pipelines()
+
+    def _initialize_pipelines(self):
+        try:
+            transformers = importlib.import_module("transformers")
+        except ModuleNotFoundError as error:
+            if error.name != "transformers":
+                raise
+            raise ImportError(
+                "The NLP application requires Hugging Face Transformers. "
+                "Install it with: pip install transformers torch"
+            ) from error
+
+        if importlib.util.find_spec("torch") is None:
+            raise ImportError(
+                "The NLP models require PyTorch. Install it with: pip install torch"
+            )
+
+        self.pipeline_factory = transformers.pipeline
+        print("=" * 70)
+        print(" HUGGING FACE NLP APPLICATION")
+        print("=" * 70)
+        print("\nLoading pretrained models; the first run may download model files.")
+        for task, model_id in MODEL_IDS.items():
+            start_time = time.perf_counter()
+            kwargs = {}
+            if task == "ner":
+                kwargs["aggregation_strategy"] = "simple"
+            self.pipelines[task] = self.pipeline_factory(
+                self._pipeline_task_name(task),
+                model=model_id,
+                **kwargs,
+            )
+            self.model_loading_time[task] = time.perf_counter() - start_time
+            print(f"Loaded {task}: {model_id}")
+
+        print("\nModel Loading Times:")
+        for task, time_taken in self.model_loading_time.items():
+            print(f" {task}: {time_taken:.2f} seconds")
+
+    @staticmethod
+    def _pipeline_task_name(task: str) -> str:
+        task_names = {
+            "sentiment": "sentiment-analysis",
+            "generation": "text-generation",
+            "qa": "question-answering",
+            "zero_shot": "zero-shot-classification",
+            "summarization": "summarization",
+            "ner": "ner",
+        }
+        return task_names[task]
+
+    def _record_result(self, task: str, result: Any):
+        self.results_history.append({"task": task, "result": result})
+        return result
+
+    def sentiment_analysis(self, texts: List[str]) -> List[Dict[str, Any]]:
+        print("\n" + "=" * 70)
+        print(" SENTIMENT ANALYSIS")
+        print("=" * 70)
+        results = self.pipelines["sentiment"](texts)
+        for index, (text, result) in enumerate(zip(texts, results), 1):
+            print(f"\n[{index}] Text: {text[:80]}")
+            print(f" Sentiment: {result['label']}")
+            print(f" Confidence: {result['score']:.3f}")
+        return self._record_result("sentiment", results)
+
+    def text_generation(
+        self,
+        prompts: List[str],
+        max_new_tokens: int = 50,
+        temperature: float = 0.7,
+        num_sequences: int = 1,
+    ) -> List[List[Dict[str, Any]]]:
+        if max_new_tokens < 1:
+            raise ValueError("max_new_tokens must be at least 1")
+        if temperature <= 0:
+            raise ValueError("temperature must be greater than 0")
+        if num_sequences < 1:
+            raise ValueError("num_sequences must be at least 1")
+
+        print("\n" + "=" * 70)
+        print(" TEXT GENERATION")
+        print("=" * 70)
+        results = []
+        generator = self.pipelines["generation"]
+        for prompt in prompts:
+            generated = generator(
+                prompt,
+                max_new_tokens=max_new_tokens,
+                temperature=temperature,
+                do_sample=True,
+                num_return_sequences=num_sequences,
+                pad_token_id=generator.tokenizer.eos_token_id,
+            )
+            results.append(generated)
+            print(f"\nPrompt: {prompt}")
+            for item in generated:
+                print(f" Generated: {item['generated_text']}")
+        return self._record_result("generation", results)
+
+    def question_answering(
+        self, questions: List[str], context: str
+    ) -> List[Dict[str, Any]]:
+        if not context.strip():
+            raise ValueError("context must not be empty")
+
+        print("\n" + "=" * 70)
+        print(" QUESTION ANSWERING")
+        print("=" * 70)
+        results = []
+        for question in questions:
+            result = self.pipelines["qa"](question=question, context=context)
+            results.append(result)
+            print(f"\nQ: {question}")
+            print(f"A: {result['answer']}")
+            print(f" Confidence: {result['score']:.3f}")
+            print(f" Context Position: {result['start']}-{result['end']}")
+        return self._record_result("qa", results)
+
+    def zero_shot_classification(
+        self,
+        texts: List[str],
+        candidate_labels: List[str],
+        multi_label: bool = False,
+    ) -> List[Dict[str, Any]]:
+        if not candidate_labels:
+            raise ValueError("candidate_labels must contain at least one label")
+
+        print("\n" + "=" * 70)
+        print(" ZERO-SHOT CLASSIFICATION")
+        print("=" * 70)
+        results = []
+        for text in texts:
+            result = self.pipelines["zero_shot"](
+                text,
+                candidate_labels=candidate_labels,
+                multi_label=multi_label,
+            )
+            results.append(result)
+            print(f"\nText: {text[:80]}")
+            for label, score in zip(result["labels"], result["scores"]):
+                print(f" {label}: {score:.3f}")
+        return self._record_result("zero_shot", results)
+
+    def summarization(
+        self,
+        texts: List[str],
+        max_length: int = 100,
+        min_length: int = 30,
+    ) -> List[Dict[str, Any]]:
+        if min_length < 0 or max_length < 1 or min_length > max_length:
+            raise ValueError("require 0 <= min_length <= max_length")
+
+        print("\n" + "=" * 70)
+        print(" TEXT SUMMARIZATION")
+        print("=" * 70)
+        results = []
+        for text in texts:
+            result = self.pipelines["summarization"](
+                text,
+                max_length=max_length,
+                min_length=min_length,
+                do_sample=False,
+            )
+            summary = result[0]
+            results.append(summary)
+            print(f"\nOriginal Text: {text[:100]}")
+            print(f"Summary: {summary['summary_text']}")
+        return self._record_result("summarization", results)
+
+    def named_entity_recognition(
+        self, texts: List[str]
+    ) -> List[List[Dict[str, Any]]]:
+        print("\n" + "=" * 70)
+        print(" NAMED ENTITY RECOGNITION")
+        print("=" * 70)
+        results = []
+        for text in texts:
+            entities = self.pipelines["ner"](text)
+            results.append(entities)
+            print(f"\nText: {text}")
+            if entities:
+                for entity in entities:
+                    entity_type = entity.get(
+                        "entity_group", entity.get("entity", "Unknown")
+                    )
+                    print(
+                        f" - {entity['word']} ({entity_type}) "
+                        f"- confidence {entity['score']:.3f}"
+                    )
+            else:
+                print(" No entities found")
+        return self._record_result("ner", results)
+
+    def run_comprehensive_demo(self):
+        long_text = (
+            "Artificial intelligence (AI) is changing how people work, learn, "
+            "and communicate. Machine-learning systems can recognize patterns "
+            "in large datasets and support applications such as translation, "
+            "medical-image analysis, and virtual assistants. These systems can "
+            "save time, but their results depend on the data and the task. "
+            "Researchers continue to study reliability, privacy, fairness, "
+            "and the effects of automation. Careful evaluation and human "
+            "oversight are important when AI is used in high-impact settings."
+        )
+
+        print("\n" + "=" * 70)
+        print(" COMPREHENSIVE NLP DEMONSTRATION")
+        print("=" * 70)
+        self.sentiment_analysis(
+            [
+                "This product is absolutely amazing! Best purchase I've ever made.",
+                "Terrible quality, complete waste of money. Would not recommend.",
+                "It arrived on time and works as expected. Nothing special.",
+            ]
+        )
+        self.text_generation(
+            ["The future of artificial intelligence is"],
+            max_new_tokens=50,
+            temperature=0.7,
+        )
+        self.question_answering(
+            [
+                "What can machine-learning systems do?",
+                "What concerns do researchers study?",
+                "Why is human oversight important?",
+            ],
+            context=long_text,
+        )
+        self.zero_shot_classification(
+            [
+                "The new phone has incredible camera quality and battery life.",
+                "The government announced new tax policies for small businesses.",
+                "The team won the championship in a thrilling final game.",
+            ],
+            candidate_labels=["technology", "politics", "sports", "business"],
+        )
+        self.summarization([long_text], max_length=50, min_length=20)
+        self.named_entity_recognition(
+            [
+                "Dr. Marie Curie conducted research at the University of Paris.",
+                "Apple Inc. is headquartered in Cupertino, California.",
+            ]
+        )
+        self.generate_performance_report()
+
+    def generate_performance_report(self):
+        print("\n" + "=" * 70)
+        print(" PERFORMANCE EVALUATION REPORT")
+        print("=" * 70)
+        print("\n1. Model Loading Times:")
+        for task, time_taken in self.model_loading_time.items():
+            print(f" {task:15}: {time_taken:.2f} seconds")
+        print("\n2. Model Details:")
+        for task, model_id in MODEL_IDS.items():
+            print(f" {task:15}: {model_id}")
+        print("\n3. Tasks Completed:")
+        result_counts = {}
+        for item in self.results_history:
+            result_counts[item["task"]] = result_counts.get(item["task"], 0) + 1
+        for task, count in result_counts.items():
+            print(f" {task:15}: {count} run(s)")
+        print("\n4. Qualitative Strengths and Limitations:")
+        print(" Sentiment: fast for short English text; nuance may be missed")
+        print(" Generation: flexible; output should be reviewed")
+        print(" Question answering: extracts answers from the supplied context")
+        print(" Zero-shot: supports custom labels; scores are model estimates")
+        print(" Summarization: condenses text; details may be omitted")
+        print(" NER: extracts entities; performance depends on the text domain")
+        print("\nThese observations are not a benchmark; compare against labeled data")
+        print("before drawing conclusions about model quality.")
+
+
+def create_interactive_app():
+    try:
+        st = importlib.import_module("streamlit")
+    except ModuleNotFoundError as error:
+        if error.name != "streamlit":
+            raise
+        raise ImportError(
+            "The interactive UI requires Streamlit. Install it with: "
+            "pip install streamlit"
+        ) from error
+
+    st.set_page_config(page_title="NLP App - Hugging Face", layout="wide")
+    st.title("NLP Application with Hugging Face")
+    if "app" not in st.session_state:
+        with st.spinner("Loading models..."):
+            st.session_state.app = HuggingFaceNLPApplication()
+    app = st.session_state.app
+    task = st.sidebar.selectbox(
+        "Select NLP Task",
+        [
+            "Sentiment Analysis",
+            "Text Generation",
+            "Question Answering",
+            "Zero-Shot Classification",
+            "Summarization",
+            "Named Entity Recognition",
+        ],
+    )
+
+    if task == "Sentiment Analysis":
+        st.subheader(task)
+        text = st.text_area("Enter text:", "This product is absolutely amazing!")
+        if st.button("Analyze"):
+            result = app.sentiment_analysis([text])[0]
+            st.success(f"Sentiment: {result['label']}")
+            st.info(f"Confidence: {result['score']:.2%}")
+    elif task == "Text Generation":
+        st.subheader(task)
+        prompt = st.text_input("Enter prompt:", "The future of AI is")
+        max_tokens = st.slider("Max new tokens", 10, 200, 50)
+        temperature = st.slider("Temperature", 0.1, 1.0, 0.7)
+        if st.button("Generate"):
+            result = app.text_generation(
+                [prompt],
+                max_new_tokens=max_tokens,
+                temperature=temperature,
+            )
+            st.success(result[0][0]["generated_text"])
+    elif task == "Question Answering":
+        st.subheader(task)
+        context = st.text_area("Context:", "AI is the field of artificial intelligence.")
+        question = st.text_input("Question:", "What is AI?")
+        if st.button("Get Answer"):
+            result = app.question_answering([question], context)[0]
+            st.success(f"Answer: {result['answer']}")
+            st.info(f"Confidence: {result['score']:.2%}")
+    elif task == "Zero-Shot Classification":
+        st.subheader(task)
+        text = st.text_area("Text to classify:")
+        labels = st.text_input(
+            "Candidate labels (comma-separated):",
+            "technology,business,sports,politics",
+        )
+        if st.button("Classify"):
+            label_list = [label.strip() for label in labels.split(",") if label.strip()]
+            result = app.zero_shot_classification([text], label_list)[0]
+            for label, score in zip(result["labels"], result["scores"]):
+                st.progress(score, text=f"{label}: {score:.2%}")
+    elif task == "Summarization":
+        st.subheader(task)
+        text = st.text_area("Text to summarize:", height=150)
+        if st.button("Summarize"):
+            result = app.summarization([text])[0]
+            st.success(result["summary_text"])
+    else:
+        st.subheader("Named Entity Recognition")
+        text = st.text_area(
+            "Text for entity extraction:",
+            "Dr. Marie Curie worked at the University of Paris.",
+        )
+        if st.button("Extract Entities"):
+            entities = app.named_entity_recognition([text])[0]
+            if entities:
+                for entity in entities:
+                    st.write(
+                        f"{entity['word']} "
+                        f"({entity.get('entity_group', 'Unknown')})"
+                    )
+            else:
+                st.warning("No entities found")
+
+    st.sidebar.markdown("---")
+    st.sidebar.info("Built with Hugging Face Transformers")
+
+
+def main():
+    print("\n" + "=" * 80)
+    print(" EXPERIMENT 7: NATURAL LANGUAGE PROCESSING WITH HUGGING FACE")
+    print("=" * 80)
+    print("\nPipeline Tasks:")
+    print(" - Sentiment analysis")
+    print(" - Text generation")
+    print(" - Question answering")
+    print(" - Zero-shot classification")
+    print(" - Summarization")
+    print(" - Named entity recognition")
+    print("\nLoading models can require internet access, disk space, and several minutes.")
+    try:
+        app = HuggingFaceNLPApplication()
+    except ImportError as error:
+        print(f"\nCannot start the NLP application: {error}")
+        return
+
+    app.run_comprehensive_demo()
+    interactive = input("\nRun the interactive Streamlit app? (yes/no): ")
+    if interactive.strip().lower() in {"yes", "y"}:
+        create_interactive_app()
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+16. Smart City Traffic Congestion Prediction
+import importlib
+import importlib.util
+from datetime import datetime, timedelta
+from typing import Any, Dict, Optional, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+
+TRAFFIC_FEATURES = [
+    "hour",
+    "day_of_week",
+    "is_weekend",
+    "location_encoded",
+    "area_encoded",
+    "hour_sin",
+    "hour_cos",
+    "day_sin",
+    "day_cos",
+]
+
+
+def _import_sklearn(module_name: str):
+    try:
+        return importlib.import_module(module_name)
+    except ModuleNotFoundError as error:
+        if error.name != "sklearn":
+            raise
+        raise ImportError(
+            "This application requires scikit-learn. "
+            "Install it with: pip install scikit-learn"
+        ) from error
+
+
+def _import_torch():
+    try:
+        return importlib.import_module("torch")
+    except ModuleNotFoundError as error:
+        if error.name != "torch":
+            raise
+        raise ImportError(
+            "The neural-network model requires PyTorch. "
+            "Install it with: pip install torch"
+        ) from error
+
+
+def _require_model_dependencies():
+    required = {"sklearn": "scikit-learn", "torch": "torch"}
+    missing = [
+        package
+        for module, package in required.items()
+        if importlib.util.find_spec(module) is None
+    ]
+    if missing:
+        raise ImportError(
+            "Traffic model training requires "
+            + " and ".join(missing)
+            + ". Install them with: pip install scikit-learn torch"
+        )
+
+
+class TrafficDataGenerator:
+    def __init__(self):
+        self.locations = [
+            "Downtown Main St",
+            "Highway 101",
+            "Industrial Area",
+            "Business District",
+            "Residential Zone A",
+            "Residential Zone B",
+            "Shopping Mall Area",
+            "University Campus",
+            "Hospital District",
+            "Stadium Area",
+            "Airport Road",
+            "Railway Station",
+        ]
+        self.area_types = {
+            "Downtown Main St": "commercial",
+            "Highway 101": "highway",
+            "Industrial Area": "industrial",
+            "Business District": "commercial",
+            "Residential Zone A": "residential",
+            "Residential Zone B": "residential",
+            "Shopping Mall Area": "commercial",
+            "University Campus": "educational",
+            "Hospital District": "medical",
+            "Stadium Area": "entertainment",
+            "Airport Road": "transportation",
+            "Railway Station": "transportation",
+        }
+
+    def generate_traffic_data(self, days: int = 30) -> pd.DataFrame:
+        if days < 1:
+            raise ValueError("days must be at least 1")
+
+        base_patterns = {
+            "commercial": {"peak_hours": [9, 10, 17, 18], "base_volume": 150},
+            "highway": {"peak_hours": [8, 9, 17, 18], "base_volume": 300},
+            "industrial": {"peak_hours": [7, 8, 16, 17], "base_volume": 200},
+            "residential": {"peak_hours": [7, 8, 17, 18], "base_volume": 80},
+            "educational": {
+                "peak_hours": [8, 9, 12, 13, 17],
+                "base_volume": 120,
+            },
+            "medical": {"peak_hours": [9, 10, 14, 15], "base_volume": 100},
+            "entertainment": {
+                "peak_hours": [12, 13, 19, 20],
+                "base_volume": 130,
+            },
+            "transportation": {
+                "peak_hours": [7, 8, 17, 18, 21, 22],
+                "base_volume": 250,
+            },
+        }
+        start_date = datetime.now().replace(minute=0, second=0, microsecond=0)
+        start_date -= timedelta(days=days - 1, hours=start_date.hour)
+        rng = np.random.RandomState(42)
+        data = []
+
+        for location in self.locations:
+            area_type = self.area_types[location]
+            pattern = base_patterns[area_type]
+            base_volume = pattern["base_volume"]
+            for day in range(days):
+                current_date = start_date + timedelta(days=day)
+                day_of_week = current_date.weekday()
+                is_weekend = day_of_week >= 5
+                for hour in range(24):
+                    hour_effect = 0.5 + sum(
+                        0.4 * np.exp(-((hour - peak_hour) ** 2) / 8)
+                        for peak_hour in pattern["peak_hours"]
+                    )
+                    daily_variation = rng.uniform(0.8, 1.2)
+                    weekend_factor = 0.7 if is_weekend else 1.0
+                    weather_factor = rng.uniform(0.9, 1.1)
+                    event_factor = (
+                        rng.uniform(1.2, 1.8)
+                        if rng.random_sample() < 0.05
+                        else 1.0
+                    )
+                    volume = int(
+                        base_volume
+                        * daily_variation
+                        * hour_effect
+                        * weekend_factor
+                        * weather_factor
+                        * event_factor
+                    )
+                    max_speed = 80 if area_type == "highway" else 50
+                    speed_factor = 1 - volume / (base_volume * 3)
+                    speed = max(
+                        5,
+                        max_speed * max(0.3, speed_factor)
+                        + rng.uniform(-5, 5),
+                    )
+
+                    if volume > base_volume * 1.8:
+                        congestion = "heavy"
+                    elif volume > base_volume * 1.2:
+                        congestion = "moderate"
+                    else:
+                        congestion = "light"
+
+                    timestamp = current_date.replace(hour=hour)
+                    data.append(
+                        {
+                            "timestamp": timestamp,
+                            "location": location,
+                            "area_type": area_type,
+                            "hour": hour,
+                            "day_of_week": day_of_week,
+                            "is_weekend": int(is_weekend),
+                            "volume": volume,
+                            "speed": round(speed, 1),
+                            "congestion_level": congestion,
+                        }
+                    )
+        return pd.DataFrame(data)
+
+
+class TrafficPredictor:
+    def __init__(self):
+        self.models: Dict[str, Any] = {}
+        self.scaler = None
+        self.location_encoder = None
+        self.area_encoder = None
+        self.performance_metrics: Dict[str, Dict[str, Any]] = {}
+
+    def prepare_features(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
+        if df.empty:
+            raise ValueError("Cannot prepare features from an empty dataset")
+        preprocessing = _import_sklearn("sklearn.preprocessing")
+        self.location_encoder = preprocessing.LabelEncoder()
+        self.area_encoder = preprocessing.LabelEncoder()
+        features_df = df.copy()
+        features_df["location_encoded"] = self.location_encoder.fit_transform(
+            features_df["location"]
+        )
+        features_df["area_encoded"] = self.area_encoder.fit_transform(
+            features_df["area_type"]
+        )
+        features_df["hour_sin"] = np.sin(2 * np.pi * features_df["hour"] / 24)
+        features_df["hour_cos"] = np.cos(2 * np.pi * features_df["hour"] / 24)
+        features_df["day_sin"] = np.sin(
+            2 * np.pi * features_df["day_of_week"] / 7
+        )
+        features_df["day_cos"] = np.cos(
+            2 * np.pi * features_df["day_of_week"] / 7
+        )
+        return features_df[TRAFFIC_FEATURES], features_df["volume"]
+
+    def train_random_forest(
+        self, X_train: pd.DataFrame, y_train: pd.Series
+    ):
+        ensemble = _import_sklearn("sklearn.ensemble")
+        print("\nTraining Random Forest Regressor...")
+        model = ensemble.RandomForestRegressor(
+            n_estimators=100,
+            max_depth=15,
+            random_state=42,
+            n_jobs=-1,
+        )
+        model.fit(X_train, y_train)
+        self.models["random_forest"] = model
+        return model
+
+    def train_gradient_boosting(
+        self, X_train: pd.DataFrame, y_train: pd.Series
+    ):
+        ensemble = _import_sklearn("sklearn.ensemble")
+        print("\nTraining Gradient Boosting Regressor...")
+        model = ensemble.GradientBoostingRegressor(
+            n_estimators=100,
+            learning_rate=0.1,
+            max_depth=5,
+            random_state=42,
+        )
+        model.fit(X_train, y_train)
+        self.models["gradient_boosting"] = model
+        return model
+
+    def train_neural_network(
+        self,
+        X_train: pd.DataFrame,
+        y_train: pd.Series,
+        epochs: int = 50,
+        batch_size: int = 64,
+    ):
+        torch = _import_torch()
+        nn = importlib.import_module("torch.nn")
+        optim = importlib.import_module("torch.optim")
+        data_utils = importlib.import_module("torch.utils.data")
+
+        preprocessing = _import_sklearn("sklearn.preprocessing")
+        if epochs < 1 or batch_size < 1:
+            raise ValueError("epochs and batch_size must be at least 1")
+        print("\nTraining Neural Network...")
+        self.scaler = preprocessing.StandardScaler()
+        X_scaled = self.scaler.fit_transform(X_train)
+        X_tensor = torch.tensor(X_scaled, dtype=torch.float32)
+        y_tensor = torch.tensor(
+            y_train.to_numpy(), dtype=torch.float32
+        ).reshape(-1, 1)
+        dataset = data_utils.TensorDataset(X_tensor, y_tensor)
+        dataloader = data_utils.DataLoader(
+            dataset, batch_size=batch_size, shuffle=True
+        )
+
+        class TrafficNN(nn.Module):
+            def __init__(self, input_size: int):
+                super().__init__()
+                self.network = nn.Sequential(
+                    nn.Linear(input_size, 128),
+                    nn.ReLU(),
+                    nn.Dropout(0.2),
+                    nn.Linear(128, 64),
+                    nn.ReLU(),
+                    nn.Dropout(0.2),
+                    nn.Linear(64, 32),
+                    nn.ReLU(),
+                    nn.Linear(32, 1),
+                )
+
+            def forward(self, inputs):
+                return self.network(inputs)
+
+        model = TrafficNN(X_train.shape[1])
+        criterion = nn.MSELoss()
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        losses = []
+        model.train()
+        for epoch in range(epochs):
+            epoch_loss = 0.0
+            for X_batch, y_batch in dataloader:
+                optimizer.zero_grad()
+                predictions = model(X_batch)
+                loss = criterion(predictions, y_batch)
+                loss.backward()
+                optimizer.step()
+                epoch_loss += loss.item()
+            average_loss = epoch_loss / len(dataloader)
+            losses.append(average_loss)
+            if (epoch + 1) % 10 == 0:
+                print(f" Epoch {epoch + 1}/{epochs}, Loss: {average_loss:.4f}")
+        self.models["neural_network"] = model
+        return model, losses
+
+    def evaluate_models(
+        self, X_test: pd.DataFrame, y_test: pd.Series
+    ) -> Dict[str, Dict[str, Any]]:
+        metrics_module = _import_sklearn("sklearn.metrics")
+        print("\n" + "=" * 60)
+        print(" MODEL EVALUATION")
+        print("=" * 60)
+        metrics = {}
+        for name, model in self.models.items():
+            if name == "neural_network":
+                if self.scaler is None:
+                    raise RuntimeError("Neural-network scaler has not been fitted")
+                torch = _import_torch()
+                X_scaled = self.scaler.transform(X_test)
+                X_tensor = torch.tensor(X_scaled, dtype=torch.float32)
+                model.eval()
+                with torch.no_grad():
+                    predictions = model(X_tensor).cpu().numpy().flatten()
+            else:
+                predictions = model.predict(X_test)
+
+            mae = metrics_module.mean_absolute_error(y_test, predictions)
+            mse = metrics_module.mean_squared_error(y_test, predictions)
+            rmse = float(np.sqrt(mse))
+            r2 = metrics_module.r2_score(y_test, predictions)
+            metrics[name] = {
+                "mae": mae,
+                "mse": mse,
+                "rmse": rmse,
+                "r2": r2,
+                "predictions": predictions,
+            }
+            print(f"\n{name.upper()}:")
+            print(f" MAE: {mae:.2f}")
+            print(f" RMSE: {rmse:.2f}")
+            print(f" R2 Score: {r2:.3f}")
+        if not metrics:
+            raise RuntimeError("No trained models are available to evaluate")
+        self.performance_metrics = metrics
+        return metrics
+
+    def predict_future(
+        self, df: pd.DataFrame, hours_ahead: int = 24
+    ) -> pd.DataFrame:
+        if hours_ahead < 1:
+            raise ValueError("hours_ahead must be at least 1")
+        if not self.performance_metrics:
+            raise RuntimeError("Evaluate trained models before predicting")
+        if self.location_encoder is None or self.area_encoder is None:
+            raise RuntimeError("Prepare training features before predicting")
+
+        last_timestamp = df["timestamp"].max()
+        future_timestamps = [
+            last_timestamp + timedelta(hours=hour)
+            for hour in range(1, hours_ahead + 1)
+        ]
+        locations = df["location"].unique()
+        area_map = df.groupby("location")["area_type"].first().to_dict()
+        future_df = pd.DataFrame(
+            [
+                {
+                    "location": location,
+                    "area_type": area_map[location],
+                    "timestamp": timestamp,
+                    "hour": timestamp.hour,
+                    "day_of_week": timestamp.weekday(),
+                    "is_weekend": int(timestamp.weekday() >= 5),
+                }
+                for location in locations
+                for timestamp in future_timestamps
+            ]
+        )
+
+        future_df["location_encoded"] = self.location_encoder.transform(
+            future_df["location"]
+        )
+        future_df["area_encoded"] = self.area_encoder.transform(
+            future_df["area_type"]
+        )
+        future_df["hour_sin"] = np.sin(2 * np.pi * future_df["hour"] / 24)
+        future_df["hour_cos"] = np.cos(2 * np.pi * future_df["hour"] / 24)
+        future_df["day_sin"] = np.sin(
+            2 * np.pi * future_df["day_of_week"] / 7
+        )
+        future_df["day_cos"] = np.cos(
+            2 * np.pi * future_df["day_of_week"] / 7
+        )
+        X_future = future_df[TRAFFIC_FEATURES]
+        best_model_name = max(
+            self.performance_metrics,
+            key=lambda name: self.performance_metrics[name]["r2"],
+        )
+        print(
+            f"\nUsing {best_model_name} for future predictions "
+            f"(R2={self.performance_metrics[best_model_name]['r2']:.3f})"
+        )
+
+        model = self.models[best_model_name]
+        if best_model_name == "neural_network":
+            if self.scaler is None:
+                raise RuntimeError("Neural-network scaler has not been fitted")
+            torch = _import_torch()
+            model.eval()
+            X_tensor = torch.tensor(
+                self.scaler.transform(X_future), dtype=torch.float32
+            )
+            with torch.no_grad():
+                predictions = model(X_tensor).cpu().numpy().flatten()
+        else:
+            predictions = model.predict(X_future)
+        future_df["predicted_volume"] = predictions
+        return future_df
+
+
+class SmartCityTrafficSystem:
+    def __init__(self):
+        self.data_generator = TrafficDataGenerator()
+        self.predictor = TrafficPredictor()
+        self.data: Optional[pd.DataFrame] = None
+        self.X_train = None
+        self.X_test = None
+        self.y_train = None
+        self.y_test = None
+        self.insights: Dict[str, Any] = {}
+
+    def load_data(self, days: int = 30) -> pd.DataFrame:
+        print("\n" + "=" * 60)
+        print(" LOADING TRAFFIC DATA")
+        print("=" * 60)
+        self.data = self.data_generator.generate_traffic_data(days)
+        print(f"Data loaded: {len(self.data)} records")
+        print(
+            f"Time range: {self.data['timestamp'].min()} to "
+            f"{self.data['timestamp'].max()}"
+        )
+        print(f"Locations: {self.data['location'].nunique()}")
+        print(f"Area types: {self.data['area_type'].nunique()}")
+        return self.data
+
+    def analyze_data(self) -> Dict[str, Any]:
+        if self.data is None or self.data.empty:
+            raise RuntimeError("Load traffic data before analyzing it")
+        print("\n" + "=" * 60)
+        print(" EXPLORATORY DATA ANALYSIS")
+        print("=" * 60)
+        df = self.data
+        print("\nTraffic Volume Statistics:")
+        print(df["volume"].describe())
+        print("\nCongestion Level Distribution:")
+        print(df["congestion_level"].value_counts())
+
+        hourly_average = df.groupby("hour")["volume"].mean()
+        peak_hour = int(hourly_average.idxmax())
+        area_stats = df.groupby("area_type")["volume"].agg(["mean", "max"])
+        weekday_average = df.loc[df["is_weekend"] == 0, "volume"].mean()
+        weekend_average = df.loc[df["is_weekend"] == 1, "volume"].mean()
+        weekend_reduction = (
+            float((1 - weekend_average / weekday_average) * 100)
+            if pd.notna(weekend_average)
+            and pd.notna(weekday_average)
+            and weekday_average > 0
+            else 0.0
+        )
+
+        print(f"\nPeak Hour: {peak_hour}:00")
+        print(f"Peak Average Volume: {hourly_average.max():.0f}")
+        print("\nTraffic by Area Type:")
+        for area, stats in area_stats.iterrows():
+            print(f" {area}: Avg={stats['mean']:.0f}, Max={stats['max']:.0f}")
+        print(f"\nWeekday Average: {weekday_average:.0f}")
+        if pd.notna(weekend_average):
+            print(f"Weekend Average: {weekend_average:.0f}")
+        else:
+            print("Weekend Average: unavailable (no weekend data)")
+        print(f"Weekend Reduction: {weekend_reduction:.1f}%")
+
+        self.insights = {
+            "peak_hour": peak_hour,
+            "weekend_reduction": weekend_reduction,
+            "busiest_area": area_stats["mean"].idxmax(),
+        }
+        return self.insights
+
+    def visualize_traffic_patterns(self):
+        if self.data is None or self.data.empty:
+            raise RuntimeError("Load traffic data before visualizing it")
+        df = self.data
+        fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+        hourly_average = df.groupby("hour")["volume"].mean()
+        axes[0, 0].plot(hourly_average.index, hourly_average.values, "b-", linewidth=2)
+        axes[0, 0].set_title("Average Traffic Volume by Hour")
+        axes[0, 0].set_xlabel("Hour")
+        axes[0, 0].set_ylabel("Average Volume")
+        axes[0, 0].grid(True, alpha=0.3)
+
+        congestion_counts = df["congestion_level"].value_counts()
+        colors = {"light": "#2ecc71", "moderate": "#f1c40f", "heavy": "#e74c3c"}
+        axes[0, 1].pie(
+            congestion_counts.values,
+            labels=congestion_counts.index,
+            autopct="%1.1f%%",
+            colors=[colors[level] for level in congestion_counts.index],
+        )
+        axes[0, 1].set_title("Congestion Level Distribution")
+
+        area_average = df.groupby("area_type")["volume"].mean().sort_values()
+        axes[1, 0].barh(area_average.index, area_average.values, color="steelblue")
+        axes[1, 0].set_title("Average Traffic Volume by Area")
+        axes[1, 0].set_xlabel("Average Volume")
+
+        pivot = df.pivot_table(
+            values="volume", index="hour", columns="day_of_week", aggfunc="mean"
+        )
+        image = axes[1, 1].imshow(pivot.values, aspect="auto", cmap="YlOrRd")
+        axes[1, 1].set_title("Traffic Heatmap (Hour vs Day)")
+        axes[1, 1].set_xlabel("Day of Week")
+        axes[1, 1].set_ylabel("Hour")
+        axes[1, 1].set_xticks(range(len(pivot.columns)))
+        axes[1, 1].set_xticklabels(
+            ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][
+                : len(pivot.columns)
+            ]
+        )
+        fig.colorbar(image, ax=axes[1, 1])
+        fig.tight_layout()
+        fig.savefig("traffic_analysis.png", dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        print("Visualization saved as 'traffic_analysis.png'")
+
+    def build_predictive_models(self) -> Dict[str, Dict[str, Any]]:
+        if self.data is None or self.data.empty:
+            raise RuntimeError("Load traffic data before training models")
+        model_selection = _import_sklearn("sklearn.model_selection")
+        print("\n" + "=" * 60)
+        print(" BUILDING PREDICTIVE MODELS")
+        print("=" * 60)
+        X, y = self.predictor.prepare_features(self.data)
+        self.X_train, self.X_test, self.y_train, self.y_test = (
+            model_selection.train_test_split(
+                X, y, test_size=0.2, random_state=42
+            )
+        )
+        print(f"\nTraining set: {len(self.X_train)} samples")
+        print(f"Test set: {len(self.X_test)} samples")
+        self.predictor.train_random_forest(self.X_train, self.y_train)
+        self.predictor.train_gradient_boosting(self.X_train, self.y_train)
+        self.predictor.train_neural_network(
+            self.X_train, self.y_train, epochs=30
+        )
+        return self.predictor.evaluate_models(self.X_test, self.y_test)
+
+    def generate_predictions(self, hours_ahead: int = 48) -> pd.DataFrame:
+        if self.data is None:
+            raise RuntimeError("Load traffic data before generating predictions")
+        print("\n" + "=" * 60)
+        print(" GENERATING FUTURE PREDICTIONS")
+        print("=" * 60)
+        future_df = self.predictor.predict_future(self.data, hours_ahead)
+        print(f"\nGenerated predictions for {hours_ahead} hours ahead")
+        print(f"Locations: {future_df['location'].nunique()}")
+        print(f"Total predictions: {len(future_df)}")
+        print("\nTop 5 Predicted High-Volume Events:")
+        for _, row in future_df.nlargest(5, "predicted_volume").iterrows():
+            print(
+                f" {row['location']}: {row['predicted_volume']:.0f} vehicles "
+                f"at {row['timestamp'].strftime('%Y-%m-%d %H:%M')}"
+            )
+        return future_df
+
+    def generate_report(self) -> Dict[str, Any]:
+        if self.data is None:
+            raise RuntimeError("Load traffic data before generating a report")
+        report = {
+            "system_name": "Smart City Traffic Management System",
+            "data_summary": {
+                "records": len(self.data),
+                "locations": self.data["location"].nunique(),
+                "area_types": self.data["area_type"].nunique(),
+                "time_range": (
+                    f"{self.data['timestamp'].min()} to "
+                    f"{self.data['timestamp'].max()}"
+                ),
+            },
+            "insights": self.insights,
+            "model_performance": self.predictor.performance_metrics,
+            "recommendations": [],
+        }
+        print("\n" + "=" * 60)
+        print(" SYSTEM REPORT")
+        print("=" * 60)
+        print("\nData Summary:")
+        for key, value in report["data_summary"].items():
+            print(f" {key}: {value}")
+        print("\nKey Insights:")
+        for key, value in report["insights"].items():
+            if isinstance(value, float):
+                print(f" {key}: {value:.1f}%")
+            else:
+                print(f" {key}: {value}")
+        print("\nModel Performance:")
+        for model, metrics in report["model_performance"].items():
+            print(
+                f" {model}: R2={metrics['r2']:.3f}, "
+                f"RMSE={metrics['rmse']:.2f}"
+            )
+
+        if self.insights.get("weekend_reduction", 0) > 30:
+            report["recommendations"].append(
+                "Significant weekend traffic reduction detected; consider "
+                "measures that spread demand across the week."
+            )
+        if self.insights.get("peak_hour") in {8, 9, 17, 18}:
+            report["recommendations"].append(
+                "Peak hours fall during common commute periods; consider "
+                "staggered work hours or transit alternatives."
+            )
+        if report["model_performance"]:
+            best_r2 = max(
+                metrics["r2"]
+                for metrics in report["model_performance"].values()
+            )
+            if best_r2 > 0.7:
+                report["recommendations"].append(
+                    f"Best model R2 is {best_r2:.3f}; validate predictions "
+                    "against future observed data before operational use."
+                )
+            else:
+                report["recommendations"].append(
+                    "Model performance needs improvement; evaluate additional "
+                    "features and collect more representative data."
+                )
+        print("\nRecommendations:")
+        for recommendation in report["recommendations"]:
+            print(f" - {recommendation}")
+        return report
+
+    def run_system(self, days: int = 30) -> Dict[str, Any]:
+        _require_model_dependencies()
+        print("\n" + "=" * 70)
+        print(" SMART CITY TRAFFIC CONGESTION PREDICTION SYSTEM")
+        print("=" * 70)
+        self.load_data(days)
+        self.analyze_data()
+        self.visualize_traffic_patterns()
+        self.build_predictive_models()
+        self.generate_predictions(48)
+        return self.generate_report()
+
+
+class HealthcareAIApplication:
+    def __init__(self):
+        self.data: Optional[pd.DataFrame] = None
+        self.models: Dict[str, Any] = {}
+
+    def generate_healthcare_data(self, n_patients: int = 1000) -> pd.DataFrame:
+        if n_patients < 1:
+            raise ValueError("n_patients must be at least 1")
+        np.random.seed(42)
+        data = {
+            "patient_id": range(1, n_patients + 1),
+            "age": np.random.randint(18, 90, n_patients),
+            "gender": np.random.choice(["M", "F"], n_patients),
+            "bmi": np.random.normal(28, 6, n_patients),
+            "blood_pressure": np.random.randint(100, 180, n_patients),
+            "cholesterol": np.random.randint(150, 300, n_patients),
+            "diabetes": np.random.choice([0, 1], n_patients, p=[0.8, 0.2]),
+            "heart_disease": np.random.choice([0, 1], n_patients, p=[0.85, 0.15]),
+            "previous_admissions": np.random.poisson(0.5, n_patients),
+            "length_of_stay": np.random.exponential(5, n_patients),
+            "medications": np.random.randint(0, 6, n_patients),
+            "follow_up_appointments": np.random.choice(
+                [0, 1, 2], n_patients, p=[0.3, 0.4, 0.3]
+            ),
+        }
+        df = pd.DataFrame(data)
+        logit = (
+            0.01 * df["age"]
+            + 0.02 * df["bmi"]
+            + 0.005 * df["blood_pressure"]
+            + 0.1 * df["diabetes"]
+            + 0.15 * df["heart_disease"]
+            + 0.2 * df["previous_admissions"]
+            + 0.05 * df["length_of_stay"]
+            + 0.1 * df["medications"]
+            - 0.05 * df["follow_up_appointments"]
+            - 2
+        )
+        probability = 1 / (1 + np.exp(-logit))
+        df["readmitted"] = np.random.binomial(1, probability)
+        self.data = df
+        return df
+
+    def run_healthcare_demo(self):
+        if self.data is None:
+            df = self.generate_healthcare_data()
+        else:
+            df = self.data
+        model_selection = _import_sklearn("sklearn.model_selection")
+        preprocessing = _import_sklearn("sklearn.preprocessing")
+        ensemble = _import_sklearn("sklearn.ensemble")
+        metrics = _import_sklearn("sklearn.metrics")
+
+        print("\n" + "=" * 70)
+        print(" HEALTHCARE READMISSION DEMO (SYNTHETIC DATA ONLY)")
+        print("=" * 70)
+        print(f"Records: {len(df)}")
+        print(f"Readmission rate: {df['readmitted'].mean() * 100:.1f}%")
+        features = [
+            "age",
+            "bmi",
+            "blood_pressure",
+            "cholesterol",
+            "diabetes",
+            "heart_disease",
+            "previous_admissions",
+            "length_of_stay",
+            "medications",
+            "follow_up_appointments",
+        ]
+        X = df[features]
+        y = df["readmitted"]
+        scaler = preprocessing.StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        X_train, X_test, y_train, y_test = model_selection.train_test_split(
+            X_scaled, y, test_size=0.2, random_state=42, stratify=y
+        )
+        model = ensemble.RandomForestClassifier(
+            n_estimators=100,
+            random_state=42,
+            n_jobs=-1,
+        )
+        model.fit(X_train, y_train)
+        predictions = model.predict(X_test)
+        probabilities = model.predict_proba(X_test)[:, 1]
+        print("\nModel Evaluation:")
+        print(metrics.classification_report(y_test, predictions, zero_division=0))
+        print(f"AUC-ROC: {metrics.roc_auc_score(y_test, probabilities):.3f}")
+        importance = pd.DataFrame(
+            {"feature": features, "importance": model.feature_importances_}
+        ).sort_values("importance", ascending=False)
+        print("\nTop Predictive Factors:")
+        for _, row in importance.head(5).iterrows():
+            print(f" - {row['feature']}: {row['importance']:.3f}")
+        self.models["random_forest"] = model
+        return model
+
+
+def main():
+    print("\n" + "=" * 80)
+    print(" EXPERIMENT 8: AI APPLICATION DESIGN AND EVALUATION")
+    print("=" * 80)
+    print("Smart-city traffic prediction using synthetic data and supervised models.")
+    print("The healthcare section, if run, also uses synthetic data only.")
+
+    system = SmartCityTrafficSystem()
+    try:
+        report = system.run_system(days=30)
+    except ImportError as error:
+        print(f"\nCannot train the AI models: {error}")
+        print("Install the required packages and run the program again.")
+        return
+
+    print("\n" + "=" * 80)
+    healthcare_app = HealthcareAIApplication()
+    try:
+        healthcare_app.run_healthcare_demo()
+    except ImportError as error:
+        print(f"\nSkipping the optional healthcare demo: {error}")
+
+    print("\n" + "=" * 80)
+    print(" FINAL SUMMARY")
+    print("=" * 80)
+    print(f"Traffic records analyzed: {report['data_summary']['records']}")
+    print(f"Locations covered: {report['data_summary']['locations']}")
+    if report["model_performance"]:
+        best_model = max(
+            report["model_performance"],
+            key=lambda name: report["model_performance"][name]["r2"],
+        )
+        best_metrics = report["model_performance"][best_model]
+        print(
+            f"Best evaluated model: {best_model} "
+            f"(R2={best_metrics['r2']:.3f}, RMSE={best_metrics['rmse']:.2f})"
+        )
+    print("Predictions should be validated against observed traffic before use.")
+
+
+if __name__ == "__main__":
+    main()
